@@ -12336,13 +12336,14 @@ end
 --// Animated background (Fluent shine port) \\--
 Templates.AnimatedBackground = {
     Enabled = true,
-    Speed = 0.35,
-    RotationSpeed = 15,
-    Transparency = 0.95,
-    Orbs = 3,
-    OrbSize = 200,
-    OrbTransparency = 0.92,
-    OrbSpeed = 0.25,
+    Speed = 0.6,
+    RotationSpeed = 20,
+    Transparency = 0.84,
+    BaseTransparency = 0.66,
+    Orbs = 4,
+    OrbSize = 280,
+    OrbTransparency = 0.78,
+    OrbSpeed = 0.3,
     Noise = true,
     StrokeShine = true,
     ZIndex = 998,
@@ -12389,6 +12390,24 @@ function Library:CreateAnimatedBackground(Parent: GuiObject, Info, Corner: numbe
         Root.Interactable = false
     end)
     table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, Corner or Library.CornerRadius), Parent = Root }))
+
+    local function BaseColors()
+        local Bg, Accent = Library.Scheme.BackgroundColor, Library.Scheme.AccentColor
+        return ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Accent:Lerp(Bg, 0.3)),
+            ColorSequenceKeypoint.new(0.5, Accent:Lerp(Bg, 0.65)),
+            ColorSequenceKeypoint.new(1, Bg),
+        })
+    end
+
+    local Base = New("Frame", {
+        BackgroundColor3 = Color3.new(1, 1, 1),
+        BackgroundTransparency = Info.BaseTransparency,
+        Size = UDim2.fromScale(1, 1),
+        ZIndex = Info.ZIndex,
+        Parent = Root,
+    })
+    local BaseGradient = New("UIGradient", { Color = BaseColors(), Rotation = 60, Parent = Base })
 
     local Shine = New("Frame", {
         BackgroundColor3 = Color3.new(1, 1, 1),
@@ -12453,6 +12472,8 @@ function Library:CreateAnimatedBackground(Parent: GuiObject, Info, Corner: numbe
         Background.Time += DeltaTime * Background.Speed
         local Time = Background.Time
 
+        BaseGradient.Rotation = 60 + math.sin(Time * 0.5) * 35
+        BaseGradient.Offset = Vector2.new(math.sin(Time * 0.35) * 0.25, math.cos(Time * 0.3) * 0.25)
         Gradient.Rotation = (Time * Background.RotationSpeed) % 360
         Gradient.Offset = Vector2.new(math.sin(Time * 0.6) * 0.18, Gradient.Offset.Y)
 
@@ -12499,11 +12520,13 @@ function Library:CreateAnimatedBackground(Parent: GuiObject, Info, Corner: numbe
 
     function Background:SetTransparency(Value)
         Shine.BackgroundTransparency = math.clamp(tonumber(Value) or Info.Transparency, 0, 1)
+        Base.BackgroundTransparency = math.clamp((tonumber(Value) or Info.Transparency) - 0.18, 0, 1)
     end
 
     function Background:SetColors(Sequence)
         Background.Colors = Sequence
         Gradient.Color = Sequence or SchemeColors()
+        BaseGradient.Color = BaseColors()
     end
 
     function Background:SetStrokeShine(Value)
