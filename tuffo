@@ -12266,22 +12266,22 @@ end
 Library.Themes = {
     ["Normal"] = { Background = {15,15,15}, Main = {25,25,25}, Accent = {125,85,255}, Outline = {40,40,40}, Font = {255,255,255}, Animated = false },
     ["Gold Navy"] = { Background = {15,20,29}, Main = {24,32,46}, Accent = {245,197,66}, Outline = {74,144,226}, Font = {240,243,248} },
-    ["AMOLED"] = { Background={0,0,0}, Accent={255,255,255}, Outline={20,20,20}, Font={255,255,255}, Base={{0,0,0,0},{1,0,0,0}} },
+    ["AMOLED"] = { Background={0,0,0}, Accent={255,255,255}, Outline={20,20,20}, Font={255,255,255}, Base={{0,0,0,0},{1,0,0,0}}, Image="rbxassetid://134736124666311" },
     ["RGB"] = { Background={8,8,14}, Accent={0,255,180}, Outline={0,255,180}, Font={220,255,245}, Base={{0,20,0,40},{0.5,0,20,50},{1,30,0,30}} },
     ["Neon Cyber"] = { Background={5,10,5}, Accent={57,255,20}, Outline={40,200,20}, Font={200,255,190}, Base={{0,10,25,10},{1,3,8,3}} },
     ["Arctic Frost"] = { Background={185,215,235}, Accent={100,180,240}, Outline={200,228,248}, Font={20,40,70}, Base={{0,235,248,255},{1,210,235,250}} },
     ["Cotton Candy"] = { Background={255,225,245}, Accent={255,130,190}, Outline={255,190,230}, Font={75,25,55}, Base={{0,255,235,250},{1,235,210,255}} },
-    ["Orange"] = { Background={4,4,4}, Accent={255,140,30}, Outline={200,90,10}, Font={255,240,220}, Base={{0,30,10,0},{0.5,10,5,0},{1,0,0,0}} },
-    ["Cyanic"] = { Background={8,18,22}, Accent={57,197,187}, Outline={40,170,165}, Font={210,248,246}, Base={{0,15,45,55},{0.5,8,25,32},{1,4,12,16}} },
-    ["Amber Glow"] = { Background={18,10,4}, Accent={255,170,40}, Outline={200,130,30}, Font={255,245,225}, Base={{0,50,25,5},{0.5,28,14,3},{1,10,5,1}} },
+    ["Orange"] = { Background={4,4,4}, Accent={255,140,30}, Outline={200,90,10}, Font={255,240,220}, Base={{0,30,10,0},{0.5,10,5,0},{1,0,0,0}}, Image="rbxassetid://122033436660262" },
+    ["Cyanic"] = { Background={8,18,22}, Accent={57,197,187}, Outline={40,170,165}, Font={210,248,246}, Base={{0,15,45,55},{0.5,8,25,32},{1,4,12,16}}, Image="rbxassetid://95656189244173" },
+    ["Amber Glow"] = { Background={18,10,4}, Accent={255,170,40}, Outline={200,130,30}, Font={255,245,225}, Base={{0,50,25,5},{0.5,28,14,3},{1,10,5,1}}, Image="rbxassetid://107795771598485" },
     ["Bloomings"] = { Background={40,15,30}, Accent={255,80,150}, Outline={200,60,120}, Font={255,240,248}, Base={{0,120,35,85},{0.5,45,95,70},{1,150,140,145}}, Shine={Speed=0.35,Rot=15,Colors={{0,255,70,150},{0.25,80,255,150},{0.5,255,255,255},{0.75,255,50,130},{1,255,70,150}}}, Image="rbxassetid://133541508207801" },
-    ["Crimson"] = { Background={30,6,9}, Accent={220,30,60}, Outline={120,15,35}, Font={255,235,240}, Base={{0,150,15,30},{1,20,5,10}}, Shine={Speed=0.4,Rot=20,Colors={{0,80,5,20},{0.5,220,30,60},{1,80,5,20}}} },
+    ["Crimson"] = { Background={30,6,9}, Accent={220,30,60}, Outline={120,15,35}, Font={255,235,240}, Base={{0,150,15,30},{1,20,5,10}}, Shine={Speed=0.4,Rot=20,Colors={{0,80,5,20},{0.5,220,30,60},{1,80,5,20}}}, Images={"rbxassetid://132324914333495","rbxassetid://74252111742950"} },
     ["Gold"] = { Background={35,27,12}, Accent={255,200,90}, Outline={120,90,30}, Font={240,240,240}, Base={{0,70,55,20},{1,20,15,5}}, Shine={Speed=0.5,Rot=25,Colors={{0,40,30,10},{0.5,255,210,120},{1,40,30,10}}} },
     ["Deep Violet"] = { Background={20,20,20}, Accent={97,62,167}, Outline={110,90,130}, Font={240,240,240}, Base={{0,85,57,139},{1,40,25,65}}, Shine={Speed=0.5,Rot=25,Colors={{0,40,25,65},{0.5,160,120,220},{1,40,25,65}}}, Image="rbxassetid://136310484943077" },
     ["Ash Gray"] = { Background={60,60,60}, Accent={150,150,150}, Outline={90,90,90}, Font={240,240,240}, Base={{0,75,75,75},{1,35,35,35}}, Shine={Speed=0.4,Rot=20,Colors={{0,40,40,40},{0.5,105,105,105},{1,40,40,40}}} },
     ["Charcoal"] = { Background={20,20,20}, Accent={102,102,102}, Outline={60,60,60}, Font={240,240,240}, Base={{0,30,30,30},{1,10,10,10}}, Shine={Speed=0.45,Rot=25,Colors={{0,20,20,20},{0.5,150,150,150},{1,20,20,20}}} },
     ["Pearl White"] = { Background={240,240,240}, Accent={214,214,214}, Outline={200,200,200}, Font={20,20,20}, Base={{0,255,255,255},{1,220,220,220}}, Shine={Speed=0.4,Rot=20,Colors={{0,200,200,200},{0.5,255,255,255},{1,200,200,200}}} },
-    ["Blood Red"] = { Background={35,8,10}, Accent={180,10,20}, Outline={140,15,25}, Font={255,230,230}, Base={{0,130,12,20},{1,28,5,8}}, Shine={Speed=0.5,Rot=25,Colors={{0,71,0,0},{0.5,159,0,0},{1,71,0,0}}} },
+    ["Blood Red"] = { Background={35,8,10}, Accent={180,10,20}, Outline={140,15,25}, Font={255,230,230}, Base={{0,130,12,20},{1,28,5,8}}, Shine={Speed=0.5,Rot=25,Colors={{0,71,0,0},{0.5,159,0,0},{1,71,0,0}}}, Image="rbxassetid://121343473918667" },
     ["Neon Purple"] = { Background={5,0,15}, Accent={180,0,255}, Outline={140,0,255}, Font={252,245,255}, Base={{0,5,0,15},{1,45,0,160}}, Shine={Speed=0.4,Rot=20,Colors={{0,32,5,137},{0.5,171,32,253},{1,32,5,137}}} },
     ["Deep Ocean"] = { Background={15,30,45}, Accent={0,150,200}, Outline={0,100,150}, Font={240,248,255}, Base={{0,0,80,120},{1,10,25,40}}, Shine={Speed=0.5,Rot=25,Colors={{0,0,60,90},{0.5,0,200,255},{1,0,60,90}}} },
     ["Midnight Blue"] = { Background={10,8,25}, Accent={100,80,200}, Outline={60,45,140}, Font={220,220,255}, Base={{0,50,35,120},{1,8,5,20}}, Shine={Speed=0.5,Rot=25,Colors={{0,25,15,60},{0.5,140,120,240},{1,25,15,60}}} },
@@ -12323,28 +12323,56 @@ function Library:AddTheme(Name: string, Theme)
     Library.Themes[Name] = Theme
 end
 
+function Library:GetThemeScheme(Name: string)
+    local Theme = Library.Themes[Name]
+    if not Theme then
+        return nil
+    end
+
+    local Background = ThemeColor(Theme.Background)
+    local Accent = ThemeColor(Theme.Accent)
+
+    return {
+        BackgroundColor = Background,
+        MainColor = Theme.Main and ThemeColor(Theme.Main) or Background:Lerp(Accent, 0.1),
+        AccentColor = Accent,
+        OutlineColor = ThemeColor(Theme.Outline),
+        FontColor = ThemeColor(Theme.Font),
+    }
+end
+
+--// Turns off the animated background / theme image (used when a non-Fluent theme is applied)
+function Library:ClearThemeLook()
+    Library.CurrentTheme = nil
+
+    if Library.AnimatedBackground then
+        Library.AnimatedBackground:SetEnabled(false)
+    end
+
+    local Image = Library.WindowBackgroundImage
+    if Image and Image.Parent and Library.Scheme.BackgroundImage == "" then
+        Image.Visible = false
+    end
+end
+
 function Library:SetTheme(Name: string)
     local Theme = Library.Themes[Name]
     if not Theme then
         return false
     end
 
-    local Background = ThemeColor(Theme.Background)
-    local Accent = ThemeColor(Theme.Accent)
-
-    Library.Scheme.BackgroundColor = Background
-    Library.Scheme.MainColor = Theme.Main and ThemeColor(Theme.Main) or Background:Lerp(Accent, 0.1)
-    Library.Scheme.AccentColor = Accent
-    Library.Scheme.OutlineColor = ThemeColor(Theme.Outline)
-    Library.Scheme.FontColor = ThemeColor(Theme.Font)
+    for Index, Value in Library:GetThemeScheme(Name) do
+        Library.Scheme[Index] = Value
+    end
     Library.CurrentTheme = Name
 
     Library:UpdateColorsUsingRegistry()
 
     local Image = Library.WindowBackgroundImage
     if Image and Image.Parent then
-        if Theme.Image and Theme.Animated ~= false then
-            Image.Image = Theme.Image
+        local Chosen = Theme.Image or (Theme.Images and Theme.Images[math.random(#Theme.Images)])
+        if Chosen and Theme.Animated ~= false then
+            Image.Image = Chosen
             Image.ImageTransparency = Library.ThemeImageTransparency
             Image.Visible = true
         elseif Library.Scheme.BackgroundImage == "" then
@@ -19546,541 +19574,6 @@ function Library:Unload()
 
     getgenv().Library = nil
 end
-
---// SaveManager (Library.SaveManager) \\--
-Library.SaveManager = (function()
---// Obsidian SaveManager (Fluent port) :: atomic + verified JSON persistence
---// Usage:
---//   local SaveManager = loadstring(readfile("Obsidian_SaveManager.lua"))()
---//   SaveManager:SetLibrary(Library)
---//   SaveManager:SetFolder("MyHub/Game")
---//   SaveManager:IgnoreThemeSettings()
---//   SaveManager:SetIgnoreIndexes({ "MenuKeybind" })
---//   SaveManager:BuildConfigSection(Tab)   -- Tab or Groupbox
---//   SaveManager:LoadAutoloadConfig()
-
-local HttpService = game:GetService("HttpService")
-
-local SaveManager = {
-    Folder = "ObsidianSettings",
-    SubFolder = "",
-    Library = nil,
-    Ignore = {},
-    MaxBackups = 1,
-}
-
---// FS wrappers \\--
-local FS = {
-    writefile = writefile,
-    readfile = readfile,
-    isfile = isfile,
-    isfolder = isfolder,
-    makefolder = makefolder,
-    listfiles = listfiles,
-    delfile = delfile,
-}
-
-local function FSReady()
-    return FS.writefile and FS.readfile and FS.isfile and FS.isfolder and FS.makefolder and FS.listfiles
-end
-
-local function Notify(Message, Time)
-    local Library = SaveManager.Library
-    if Library and Library.Notify then
-        pcall(Library.Notify, Library, Message, Time or 3)
-    end
-end
-
---// Atomic write: temp -> verify -> commit -> verify -> cleanup \\--
---// Fixes truncated configs by never trusting a single writefile call.
-local function SafeWrite(Path, Body)
-    if not FSReady() then
-        return false, "Filesystem functions unavailable."
-    end
-
-    local Temp = Path .. ".tmp"
-    local Backup = Path .. ".bak"
-
-    local function Verified(Target)
-        if not FS.isfile(Target) then
-            return false
-        end
-
-        local Ok, Read = pcall(FS.readfile, Target)
-        if not Ok or typeof(Read) ~= "string" or #Read ~= #Body then
-            return false
-        end
-
-        local DecodeOk = pcall(HttpService.JSONDecode, HttpService, Read)
-        return DecodeOk
-    end
-
-    for Attempt = 1, 3 do
-        local WriteOk = pcall(FS.writefile, Temp, Body)
-        if WriteOk and Verified(Temp) then
-            if FS.isfile(Path) and SaveManager.MaxBackups > 0 then
-                local Ok, Old = pcall(FS.readfile, Path)
-                if Ok and typeof(Old) == "string" and #Old > 0 then
-                    pcall(FS.writefile, Backup, Old)
-                end
-            end
-
-            local CommitOk = pcall(FS.writefile, Path, Body)
-            if CommitOk and Verified(Path) then
-                if FS.delfile then
-                    pcall(FS.delfile, Temp)
-                end
-                return true
-            end
-        end
-
-        task.wait(0.05 * Attempt)
-    end
-
-    if FS.isfile(Backup) and not Verified(Path) then
-        local Ok, Old = pcall(FS.readfile, Backup)
-        if Ok and typeof(Old) == "string" then
-            pcall(FS.writefile, Path, Old)
-        end
-    end
-
-    return false, "Write verification failed (possible truncation)."
-end
-
-local function SafeRead(Path)
-    if not FSReady() or not FS.isfile(Path) then
-        return nil, "Config does not exist."
-    end
-
-    local function TryDecode(Target)
-        if not FS.isfile(Target) then
-            return nil
-        end
-
-        local Ok, Body = pcall(FS.readfile, Target)
-        if not Ok or typeof(Body) ~= "string" or #Body == 0 then
-            return nil
-        end
-
-        local DecodeOk, Data = pcall(HttpService.JSONDecode, HttpService, Body)
-        if DecodeOk and typeof(Data) == "table" then
-            return Data
-        end
-
-        return nil
-    end
-
-    local Data = TryDecode(Path) or TryDecode(Path .. ".bak")
-    if not Data then
-        return nil, "Config is corrupted or empty."
-    end
-
-    return Data
-end
-
---// Parsers \\--
-local function Number(Value, Fallback)
-    return tonumber(Value) or Fallback
-end
-
-SaveManager.Parser = {
-    Toggle = {
-        Save = function(Idx, Object)
-            return { type = "Toggle", idx = Idx, value = Object.Value }
-        end,
-        Load = function(Idx, Data)
-            local Object = SaveManager.Options[Idx]
-            if Object then
-                Object:SetValue(Data.value == true)
-            end
-        end,
-    },
-
-    Slider = {
-        Save = function(Idx, Object)
-            return { type = "Slider", idx = Idx, value = tostring(Object.Value) }
-        end,
-        Load = function(Idx, Data)
-            local Object = SaveManager.Options[Idx]
-            local Value = Number(Data.value)
-            if Object and Value then
-                Object:SetValue(Value)
-            end
-        end,
-    },
-
-    Dropdown = {
-        Save = function(Idx, Object)
-            return { type = "Dropdown", idx = Idx, value = Object.Value, multi = Object.Multi }
-        end,
-        Load = function(Idx, Data)
-            local Object = SaveManager.Options[Idx]
-            if Object then
-                Object:SetValue(Data.value)
-            end
-        end,
-    },
-
-    ColorPicker = {
-        Save = function(Idx, Object)
-            return {
-                type = "ColorPicker",
-                idx = Idx,
-                value = Object.Value:ToHex(),
-                transparency = Object.Transparency or 0,
-            }
-        end,
-        Load = function(Idx, Data)
-            local Object = SaveManager.Options[Idx]
-            if Object and typeof(Data.value) == "string" then
-                local Ok, Color = pcall(Color3.fromHex, Data.value)
-                if Ok then
-                    Object:SetValueRGB(Color, Data.transparency)
-                end
-            end
-        end,
-    },
-
-    KeyPicker = {
-        Save = function(Idx, Object)
-            return {
-                type = "KeyPicker",
-                idx = Idx,
-                mode = Object.Mode,
-                key = Object.Value,
-                modifiers = Object.Modifiers,
-            }
-        end,
-        Load = function(Idx, Data)
-            local Object = SaveManager.Options[Idx]
-            if Object then
-                Object:SetValue({ Data.key, Data.mode, Data.modifiers })
-            end
-        end,
-    },
-
-    Input = {
-        Save = function(Idx, Object)
-            return { type = "Input", idx = Idx, text = Object.Value }
-        end,
-        Load = function(Idx, Data)
-            local Object = SaveManager.Options[Idx]
-            if Object and typeof(Data.text) == "string" then
-                Object:SetValue(Data.text)
-            end
-        end,
-    },
-
-    Collapsible = {
-        Save = function(Idx, Object)
-            return { type = "Collapsible", idx = Idx, value = Object.Open == true }
-        end,
-        Load = function(Idx, Data)
-            local Object = SaveManager.Options[Idx]
-            if Object then
-                Object:SetValue(Data.value == true, true)
-            end
-        end,
-    },
-
-    ModelViewport = {
-        Save = function(Idx, Object)
-            return {
-                type = "ModelViewport",
-                idx = Idx,
-                zoom = Object.Distance,
-                yaw = Object.Yaw,
-                pitch = Object.Pitch,
-            }
-        end,
-        Load = function(Idx, Data)
-            local Object = SaveManager.Options[Idx]
-            if Object and Number(Data.zoom) then
-                Object.Yaw = Number(Data.yaw, Object.Yaw)
-                Object.Pitch = Number(Data.pitch, Object.Pitch)
-                Object:SetValue(Data.zoom)
-            end
-        end,
-    },
-}
-
---// Config API \\--
-function SaveManager:SetLibrary(Library)
-    self.Library = Library
-    self.Options = Library.Options
-end
-
-function SaveManager:SetIgnoreIndexes(List)
-    for _, Key in List do
-        self.Ignore[Key] = true
-    end
-end
-
-SaveManager.IgnoreIndexes = SaveManager.SetIgnoreIndexes
-
-function SaveManager:IgnoreThemeSettings()
-    self:SetIgnoreIndexes({
-        "BackgroundColor",
-        "MainColor",
-        "AccentColor",
-        "OutlineColor",
-        "FontColor",
-        "FontFace",
-        "ThemeManager_ThemeList",
-        "ThemeManager_CustomThemeList",
-        "ThemeManager_CustomThemeName",
-    })
-end
-
-function SaveManager:SetFolder(Folder)
-    self.Folder = Folder
-    self:BuildFolderTree()
-end
-
-function SaveManager:SetSubFolder(SubFolder)
-    self.SubFolder = SubFolder
-    self:BuildFolderTree()
-end
-
-function SaveManager:ConfigDir()
-    local Dir = self.Folder .. "/settings"
-    if self.SubFolder ~= "" then
-        Dir ..= "/" .. self.SubFolder
-    end
-    return Dir
-end
-
-function SaveManager:BuildFolderTree()
-    if not FSReady() then
-        return
-    end
-
-    local Parts = {}
-    for Part in self:ConfigDir():gmatch("[^/]+") do
-        table.insert(Parts, Part)
-        local Path = table.concat(Parts, "/")
-        if not FS.isfolder(Path) then
-            pcall(FS.makefolder, Path)
-        end
-    end
-end
-
-local function Sanitize(Name)
-    return (tostring(Name or ""):gsub("[^%w%-%_ ]", ""):match("^%s*(.-)%s*$"))
-end
-
-function SaveManager:PathFor(Name)
-    return self:ConfigDir() .. "/" .. Name .. ".json"
-end
-
-function SaveManager:Save(Name)
-    Name = Sanitize(Name)
-    if Name == "" then
-        return false, "Config name cannot be empty."
-    end
-
-    assert(self.Library, "Set SaveManager.Library first.")
-    self:BuildFolderTree()
-
-    local Data = { version = 2, objects = {} }
-    for Idx, Object in self.Options do
-        local Parser = self.Parser[Object.Type]
-        if Parser and not self.Ignore[Idx] then
-            local Ok, Entry = pcall(Parser.Save, Idx, Object)
-            if Ok and Entry then
-                table.insert(Data.objects, Entry)
-            end
-        end
-    end
-
-    local Ok, Encoded = pcall(HttpService.JSONEncode, HttpService, Data)
-    if not Ok then
-        return false, "Failed to encode config."
-    end
-
-    return SafeWrite(self:PathFor(Name), Encoded)
-end
-
-function SaveManager:Load(Name)
-    Name = Sanitize(Name)
-    if Name == "" then
-        return false, "Config name cannot be empty."
-    end
-
-    assert(self.Library, "Set SaveManager.Library first.")
-
-    local Data, Err = SafeRead(self:PathFor(Name))
-    if not Data then
-        return false, Err
-    end
-
-    for _, Entry in Data.objects or {} do
-        local Parser = typeof(Entry) == "table" and self.Parser[Entry.type]
-        if Parser and not self.Ignore[Entry.idx] then
-            task.spawn(pcall, Parser.Load, Entry.idx, Entry)
-        end
-    end
-
-    return true
-end
-
-function SaveManager:Delete(Name)
-    Name = Sanitize(Name)
-    local Path = self:PathFor(Name)
-
-    if not FS.isfile(Path) then
-        return false, "Config does not exist."
-    end
-    if not FS.delfile then
-        return false, "delfile unavailable."
-    end
-
-    pcall(FS.delfile, Path)
-    pcall(FS.delfile, Path .. ".bak")
-    pcall(FS.delfile, Path .. ".tmp")
-
-    return true
-end
-
-function SaveManager:RefreshConfigList()
-    if not FSReady() then
-        return {}
-    end
-
-    self:BuildFolderTree()
-
-    local Ok, Files = pcall(FS.listfiles, self:ConfigDir())
-    if not Ok then
-        return {}
-    end
-
-    local Names = {}
-    for _, Path in Files do
-        local Name = Path:match("([^/\\]+)%.json$")
-        if Name then
-            table.insert(Names, Name)
-        end
-    end
-
-    table.sort(Names)
-    return Names
-end
-
-function SaveManager:GetAutoloadConfig()
-    local Path = self:ConfigDir() .. "/autoload.txt"
-    if FSReady() and FS.isfile(Path) then
-        local Ok, Name = pcall(FS.readfile, Path)
-        if Ok and typeof(Name) == "string" then
-            return Sanitize(Name)
-        end
-    end
-    return "none"
-end
-
-function SaveManager:SetAutoloadConfig(Name)
-    return (pcall(FS.writefile, self:ConfigDir() .. "/autoload.txt", Sanitize(Name)))
-end
-
-function SaveManager:LoadAutoloadConfig()
-    local Name = self:GetAutoloadConfig()
-    if Name == "" or Name == "none" then
-        return
-    end
-
-    local Ok, Err = self:Load(Name)
-    Notify(Ok and ("Auto loaded config %q"):format(Name) or ("Failed to auto load: " .. tostring(Err)), 4)
-end
-
---// UI \\--
-function SaveManager:BuildConfigSection(Target)
-    assert(self.Library, "Set SaveManager.Library first.")
-
-    local Library = self.Library
-    local Groupbox = Target.AddRightGroupbox and Target:AddRightGroupbox("Configuration") or Target
-
-    Groupbox:AddInput("SaveManager_ConfigName", { Text = "Config name" })
-    Groupbox:AddDropdown("SaveManager_ConfigList", {
-        Text = "Config list",
-        Values = self:RefreshConfigList(),
-        AllowNull = true,
-    })
-
-    local function Selected()
-        return Library.Options.SaveManager_ConfigList.Value
-    end
-
-    local function Refresh()
-        local List = Library.Options.SaveManager_ConfigList
-        List:SetValues(self:RefreshConfigList())
-        List:SetValue(nil)
-    end
-
-    Groupbox:AddDivider()
-
-    Groupbox:AddButton("Create config", function()
-        local Name = Sanitize(Library.Options.SaveManager_ConfigName.Value)
-        if Name == "" then
-            return Notify("Invalid config name (empty).")
-        end
-
-        local Ok, Err = self:Save(Name)
-        Notify(Ok and ("Created config %q"):format(Name) or ("Failed to create: " .. tostring(Err)))
-        if Ok then
-            Refresh()
-        end
-    end)
-
-    Groupbox:AddButton("Load config", function()
-        local Name = Selected()
-        if not Name then
-            return Notify("Select a config first.")
-        end
-
-        local Ok, Err = self:Load(Name)
-        Notify(Ok and ("Loaded config %q"):format(Name) or ("Failed to load: " .. tostring(Err)))
-    end)
-
-    Groupbox:AddButton("Overwrite config", function()
-        local Name = Selected()
-        if not Name then
-            return Notify("Select a config first.")
-        end
-
-        local Ok, Err = self:Save(Name)
-        Notify(Ok and ("Overwrote config %q"):format(Name) or ("Failed to overwrite: " .. tostring(Err)))
-    end)
-
-    Groupbox:AddButton("Delete config", function()
-        local Name = Selected()
-        if not Name then
-            return Notify("Select a config first.")
-        end
-
-        local Ok, Err = self:Delete(Name)
-        Notify(Ok and ("Deleted config %q"):format(Name) or ("Failed to delete: " .. tostring(Err)))
-        if Ok then
-            Refresh()
-        end
-    end)
-
-    Groupbox:AddButton("Refresh list", Refresh)
-
-    Groupbox:AddButton("Set as autoload", function()
-        local Name = Selected()
-        if not Name then
-            return Notify("Select a config first.")
-        end
-
-        local Ok = pcall(FS.writefile, self:ConfigDir() .. "/autoload.txt", Name)
-        Notify(Ok and ("Autoload set to %q"):format(Name) or "Failed to set autoload.")
-    end)
-
-    self:SetIgnoreIndexes({ "SaveManager_ConfigName", "SaveManager_ConfigList" })
-    return Groupbox
-end
-
-return SaveManager
-end)()
 
 getgenv().Library = Library
 return Library
