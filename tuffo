@@ -12263,6 +12263,216 @@ function Library:AddPopup(Info)
     return Popup
 end
 
+--// Animated background (Fluent shine port) \\--
+Templates.AnimatedBackground = {
+    Enabled = true,
+    Speed = 0.35,
+    RotationSpeed = 15,
+    Transparency = 0.9,
+    Orbs = 4,
+    OrbSize = 200,
+    OrbTransparency = 0.86,
+    OrbSpeed = 0.25,
+    Noise = true,
+    StrokeShine = true,
+    ZIndex = 998,
+    --// Colors = ColorSequence (optional, defaults to Accent -> Outline -> Font -> Accent)
+}
+
+function Library:CreateAnimatedBackground(Parent: GuiObject, Info, Corner: number?)
+    if Info == false then
+        return nil
+    end
+    Info = Library:Validate(typeof(Info) == "table" and Info or {}, Templates.AnimatedBackground)
+
+    local function SchemeColors()
+        local Accent, Outline, Font = Library.Scheme.AccentColor, Library.Scheme.OutlineColor, Library.Scheme.FontColor
+        return ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Accent),
+            ColorSequenceKeypoint.new(0.35, Outline),
+            ColorSequenceKeypoint.new(0.65, Font),
+            ColorSequenceKeypoint.new(1, Accent),
+        })
+    end
+
+    local Background = {
+        Connections = {},
+        Destroyed = false,
+        Enabled = Info.Enabled,
+        Speed = Info.Speed,
+        RotationSpeed = Info.RotationSpeed,
+        Colors = Info.Colors,
+        StrokeShine = Info.StrokeShine,
+        Time = 0,
+        Type = "AnimatedBackground",
+    }
+
+    local Root = New("Frame", {
+        BackgroundTransparency = 1,
+        ClipsDescendants = true,
+        Name = "AnimatedBackground",
+        Size = UDim2.fromScale(1, 1),
+        Visible = Background.Enabled,
+        ZIndex = Info.ZIndex,
+        Parent = Parent,
+    })
+    pcall(function()
+        Root.Interactable = false
+    end)
+    table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, Corner or Library.CornerRadius), Parent = Root }))
+
+    local Shine = New("Frame", {
+        BackgroundColor3 = Color3.new(1, 1, 1),
+        BackgroundTransparency = Info.Transparency,
+        Size = UDim2.fromScale(1, 1),
+        ZIndex = Info.ZIndex,
+        Parent = Root,
+    })
+    local Gradient = New("UIGradient", {
+        Color = Background.Colors or SchemeColors(),
+        Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0),
+            NumberSequenceKeypoint.new(0.5, 0.55),
+            NumberSequenceKeypoint.new(1, 0),
+        }),
+        Parent = Shine,
+    })
+
+    if Info.Noise then
+        New("ImageLabel", {
+            Image = "rbxassetid://9968344105",
+            ImageTransparency = 0.98,
+            ScaleType = Enum.ScaleType.Tile,
+            TileSize = UDim2.fromOffset(128, 128),
+            Size = UDim2.fromScale(1, 1),
+            ZIndex = Info.ZIndex,
+            Parent = Root,
+        })
+    end
+
+    local Orbs = {}
+    local GlowImage = CustomImageManager.GetAsset("Glow")
+    for Index = 1, math.clamp(Info.Orbs, 0, 12) do
+        local Size = Info.OrbSize * (0.7 + (Index % 3) * 0.25)
+        local Orb = New("ImageLabel", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Image = GlowImage,
+            ImageColor3 = Index % 2 == 0 and Library.Scheme.OutlineColor or Library.Scheme.AccentColor,
+            ImageTransparency = Info.OrbTransparency,
+            Size = UDim2.fromOffset(Size, Size),
+            ZIndex = Info.ZIndex,
+            Parent = Root,
+        })
+        table.insert(Orbs, {
+            Frame = Orb,
+            Base = Vector2.new((Index * 0.618) % 1, (Index * 0.381 + 0.2) % 1),
+            Phase = Vector2.new(Index * 1.7, Index * 2.3),
+            Rate = Vector2.new(0.6 + (Index % 3) * 0.25, 0.5 + (Index % 2) * 0.35),
+            Accent = Index % 2 ~= 0,
+        })
+    end
+
+    local Outline = Parent:FindFirstChildOfClass("UIStroke")
+    local StrokeTime = 0
+
+    Background.Connections[1] = Library:GiveSignal(RunService.RenderStepped:Connect(function(DeltaTime)
+        if Background.Destroyed or not Background.Enabled or not Parent.Visible then
+            return
+        end
+
+        DeltaTime = math.min(DeltaTime, 0.1)
+        Background.Time += DeltaTime * Background.Speed
+        local Time = Background.Time
+
+        Gradient.Rotation = (Time * Background.RotationSpeed) % 360
+        Gradient.Offset = Vector2.new(math.sin(Time * 0.6) * 0.18, Gradient.Offset.Y)
+
+        local OrbTime = Time * Info.OrbSpeed * 3
+        for _, Orb in Orbs do
+            Orb.Frame.Position = UDim2.fromScale(
+                math.clamp(Orb.Base.X + math.sin(OrbTime * Orb.Rate.X + Orb.Phase.X) * 0.35, 0, 1),
+                math.clamp(Orb.Base.Y + math.cos(OrbTime * Orb.Rate.Y + Orb.Phase.Y) * 0.35, 0, 1)
+            )
+            Orb.Frame.ImageColor3 = Orb.Accent and Library.Scheme.AccentColor or Library.Scheme.OutlineColor
+        end
+
+        if Background.StrokeShine and Outline and Outline.Parent then
+            StrokeTime += DeltaTime * Background.Speed
+            local Pulse = (math.sin(StrokeTime) + 1) / 2
+            Outline.Thickness = 1 + Pulse * 1.25
+            Outline.Color = Library.Scheme.OutlineColor:Lerp(Library.Scheme.AccentColor, Pulse)
+        end
+    end))
+
+    local function RestoreOutline()
+        if Outline and Outline.Parent then
+            Outline.Thickness = 1
+            Outline.Color = Library.Scheme.OutlineColor
+        end
+    end
+
+    function Background:SetEnabled(Value)
+        Background.Enabled = Value == true
+        Root.Visible = Background.Enabled
+        if not Background.Enabled then
+            RestoreOutline()
+        end
+    end
+
+    function Background:Toggle()
+        Background:SetEnabled(not Background.Enabled)
+    end
+
+    function Background:SetSpeed(Speed, RotationSpeed)
+        Background.Speed = math.max(tonumber(Speed) or Background.Speed, 0)
+        Background.RotationSpeed = tonumber(RotationSpeed) or Background.RotationSpeed
+    end
+
+    function Background:SetTransparency(Value)
+        Shine.BackgroundTransparency = math.clamp(tonumber(Value) or Info.Transparency, 0, 1)
+    end
+
+    function Background:SetColors(Sequence)
+        Background.Colors = Sequence
+        Gradient.Color = Sequence or SchemeColors()
+    end
+
+    function Background:SetStrokeShine(Value)
+        Background.StrokeShine = Value == true
+        if not Background.StrokeShine then
+            RestoreOutline()
+        end
+    end
+
+    function Background:Destroy()
+        if Background.Destroyed then
+            return
+        end
+        Background.Destroyed = true
+
+        for _, Connection in Background.Connections do
+            Connection:Disconnect()
+        end
+        table.clear(Background.Connections)
+
+        RestoreOutline()
+        Root:Destroy()
+
+        if Library.AnimatedBackground == Background then
+            Library.AnimatedBackground = nil
+        end
+    end
+
+    Background.Root = Root
+    return Background
+end
+
+function Library:SetAnimatedBackground(Value)
+    if Library.AnimatedBackground then
+        Library.AnimatedBackground:SetEnabled(Value)
+    end
+end
+
 function Library:CreateWindow(WindowInfo)
     WindowInfo = Library:Validate(WindowInfo, Templates.Window)
 
@@ -12458,6 +12668,8 @@ function Library:CreateWindow(WindowInfo)
                 Parent = BackgroundImage,
             })
         )
+
+        Library.AnimatedBackground = Library:CreateAnimatedBackground(MainFrame, WindowInfo.AnimatedBackground, WindowInfo.CornerRadius)
 
         if WindowInfo.Center then
             MainFrame.Position = UDim2.new(0.5, -MainFrame.Size.X.Offset / 2, 0.5, -MainFrame.Size.Y.Offset / 2)
@@ -19127,6 +19339,9 @@ function Library:Unload()
     Library.PopupSequenceRunning = false
     Library.PopupWindow = nil
     Library.PopupParent = nil
+    if Library.AnimatedBackground then
+        Library.AnimatedBackground:Destroy()
+    end
     if ScreenGui then
         ScreenGui:Destroy()
     end
