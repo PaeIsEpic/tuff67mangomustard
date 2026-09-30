@@ -12263,15 +12263,85 @@ function Library:AddPopup(Info)
     return Popup
 end
 
+--// Themes (Fluent-style presets) \\--
+Library.Themes = {
+    ["Orange"] = { Background = { 20, 14, 10 }, Main = { 34, 24, 16 }, Accent = { 255, 140, 30 }, Outline = { 200, 95, 20 }, Font = { 255, 243, 230 } },
+    ["Gold Navy"] = { Background = { 15, 20, 29 }, Main = { 24, 32, 46 }, Accent = { 245, 197, 66 }, Outline = { 74, 144, 226 }, Font = { 240, 243, 248 } },
+    ["Blood Red"] = { Background = { 18, 8, 10 }, Main = { 34, 14, 18 }, Accent = { 220, 40, 60 }, Outline = { 150, 30, 45 }, Font = { 255, 235, 238 } },
+    ["Ocean"] = { Background = { 8, 18, 26 }, Main = { 14, 32, 46 }, Accent = { 40, 200, 220 }, Outline = { 30, 120, 170 }, Font = { 230, 248, 255 } },
+    ["Amethyst"] = { Background = { 16, 10, 26 }, Main = { 28, 18, 46 }, Accent = { 170, 110, 255 }, Outline = { 110, 70, 190 }, Font = { 245, 238, 255 } },
+    ["Emerald"] = { Background = { 8, 20, 14 }, Main = { 14, 34, 24 }, Accent = { 60, 220, 130 }, Outline = { 30, 140, 90 }, Font = { 232, 255, 242 } },
+    ["Neon Pink"] = { Background = { 20, 8, 18 }, Main = { 36, 14, 32 }, Accent = { 255, 80, 170 }, Outline = { 180, 50, 120 }, Font = { 255, 238, 248 } },
+    ["Midnight"] = { Background = { 10, 12, 20 }, Main = { 18, 22, 36 }, Accent = { 120, 150, 255 }, Outline = { 60, 80, 160 }, Font = { 236, 240, 255 } },
+}
+Library.ThemeOrder = { "Orange", "Gold Navy", "Blood Red", "Ocean", "Amethyst", "Emerald", "Neon Pink", "Midnight" }
+Library.CurrentTheme = nil
+
+function Library:GetThemeNames()
+    return table.clone(Library.ThemeOrder)
+end
+
+function Library:AddTheme(Name: string, Theme)
+    assert(typeof(Name) == "string" and typeof(Theme) == "table", "AddTheme expects (string, table).")
+    if not Library.Themes[Name] then
+        table.insert(Library.ThemeOrder, Name)
+    end
+    Library.Themes[Name] = Theme
+end
+
+function Library:SetTheme(Name: string)
+    local Theme = Library.Themes[Name]
+    if not Theme then
+        return false
+    end
+
+    local function ToColor(Value)
+        return typeof(Value) == "Color3" and Value or Color3.fromRGB(Value[1], Value[2], Value[3])
+    end
+
+    Library.Scheme.BackgroundColor = ToColor(Theme.Background)
+    Library.Scheme.MainColor = ToColor(Theme.Main)
+    Library.Scheme.AccentColor = ToColor(Theme.Accent)
+    Library.Scheme.OutlineColor = ToColor(Theme.Outline)
+    Library.Scheme.FontColor = ToColor(Theme.Font)
+    Library.CurrentTheme = Name
+
+    Library:UpdateColorsUsingRegistry()
+    if Library.AnimatedBackground then
+        Library.AnimatedBackground:SetColors(Theme.Shine)
+    end
+
+    return true
+end
+
+function Library:AddThemeSelector(Groupbox)
+    local Dropdown = Groupbox:AddDropdown("Library_ThemeList", {
+        Text = "Theme",
+        Values = Library:GetThemeNames(),
+        Default = Library.CurrentTheme or Library.ThemeOrder[1],
+        Callback = function(Value)
+            if Value ~= Library.CurrentTheme then
+                Library:SetTheme(Value)
+            end
+        end,
+    })
+
+    if Library.SaveManager then
+        Library.SaveManager:SetIgnoreIndexes({ "Library_ThemeList" })
+    end
+
+    return Dropdown
+end
+
 --// Animated background (Fluent shine port) \\--
 Templates.AnimatedBackground = {
     Enabled = true,
     Speed = 0.35,
     RotationSpeed = 15,
-    Transparency = 0.9,
-    Orbs = 4,
+    Transparency = 0.95,
+    Orbs = 3,
     OrbSize = 200,
-    OrbTransparency = 0.86,
+    OrbTransparency = 0.92,
     OrbSpeed = 0.25,
     Noise = true,
     StrokeShine = true,
@@ -12286,11 +12356,10 @@ function Library:CreateAnimatedBackground(Parent: GuiObject, Info, Corner: numbe
     Info = Library:Validate(typeof(Info) == "table" and Info or {}, Templates.AnimatedBackground)
 
     local function SchemeColors()
-        local Accent, Outline, Font = Library.Scheme.AccentColor, Library.Scheme.OutlineColor, Library.Scheme.FontColor
+        local Accent, Outline = Library.Scheme.AccentColor, Library.Scheme.OutlineColor
         return ColorSequence.new({
             ColorSequenceKeypoint.new(0, Accent),
-            ColorSequenceKeypoint.new(0.35, Outline),
-            ColorSequenceKeypoint.new(0.65, Font),
+            ColorSequenceKeypoint.new(0.5, Outline),
             ColorSequenceKeypoint.new(1, Accent),
         })
     end
@@ -12475,6 +12544,9 @@ end
 
 function Library:CreateWindow(WindowInfo)
     WindowInfo = Library:Validate(WindowInfo, Templates.Window)
+    if WindowInfo.Theme ~= false then
+        Library:SetTheme(WindowInfo.Theme or Library.CurrentTheme or "Orange")
+    end
 
     if typeof(WindowInfo.Popups) == "table" then
         for _, Popup in WindowInfo.Popups do
