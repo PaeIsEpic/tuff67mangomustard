@@ -12349,8 +12349,8 @@ function Library:ClearThemeLook()
         Library.AnimatedBackground:SetEnabled(false)
     end
 
-    local Image = Library.WindowBackgroundImage
-    if Image and Image.Parent and Library.Scheme.BackgroundImage == "" then
+    local Image = Library.ThemeImage
+    if Image and Image.Parent then
         Image.Visible = false
     end
 end
@@ -12368,14 +12368,14 @@ function Library:SetTheme(Name: string)
 
     Library:UpdateColorsUsingRegistry()
 
-    local Image = Library.WindowBackgroundImage
+    local Image = Library.ThemeImage
     if Image and Image.Parent then
         local Chosen = Theme.Image or (Theme.Images and Theme.Images[math.random(#Theme.Images)])
         if Chosen and Theme.Animated ~= false then
             Image.Image = Chosen
             Image.ImageTransparency = Library.ThemeImageTransparency
             Image.Visible = true
-        elseif Library.Scheme.BackgroundImage == "" then
+        else
             Image.Visible = false
         end
     end
@@ -12859,6 +12859,20 @@ function Library:CreateWindow(WindowInfo)
         )
 
         Library.WindowBackgroundImage = BackgroundImage
+
+        --// Separate layer for the theme's own image so SetBackgroundImage / ThemeManager can't hide it
+        Library.ThemeImage = New("ImageLabel", {
+            BackgroundTransparency = 1,
+            ImageTransparency = Library.ThemeImageTransparency,
+            Name = "ThemeImage",
+            ScaleType = Enum.ScaleType.Stretch,
+            Size = UDim2.fromScale(1, 1),
+            Visible = false,
+            ZIndex = 997,
+            Parent = MainFrame,
+        })
+        table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, WindowInfo.CornerRadius), Parent = Library.ThemeImage }))
+
         Library.AnimatedBackground = Library:CreateAnimatedBackground(MainFrame, WindowInfo.AnimatedBackground, WindowInfo.CornerRadius)
         if StartTheme ~= false then
             Library:SetTheme(StartTheme)
