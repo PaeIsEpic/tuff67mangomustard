@@ -712,6 +712,10 @@ end
 
 --// Apply Theme \\--
 function ThemeManager:ThemeUpdate()
+    if ThemeManager.Applying then
+        return --// batched: ApplyThemeData runs one final update, avoids old/new colors flashing
+    end
+
     local Library = ThemeManager.Library
 
     for _, SchemeIndex in SchemeIndexes do
@@ -741,6 +745,8 @@ function ThemeManager:ApplyThemeData(ThemeData: any): (boolean, string?)
         Library:ClearThemeLook()
     end
 
+    ThemeManager.Applying = true
+    local SuccessApply, ApplyError = pcall(function()
     for Index, Value in ThemeData do
         if Index == "VideoLink" then
             continue
@@ -772,8 +778,13 @@ function ThemeManager:ApplyThemeData(ThemeData: any): (boolean, string?)
             Element:SetValue(FinalValue)
         end
     end
+    end)
+    ThemeManager.Applying = false
 
     ThemeManager:ThemeUpdate()
+    if not SuccessApply then
+        return false, tostring(ApplyError)
+    end
     return true
 end
 
