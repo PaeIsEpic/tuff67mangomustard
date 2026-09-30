@@ -14507,7 +14507,7 @@ function Library:CreateWindow(WindowInfo)
                 Size = UDim2.new(1, -30, 1, 0),
                 Text = Name,
                 TextSize = 16,
-                TextColor3 = typeof(TabLabelColor) == "string" and Library.Scheme[TabLabelColor] or TabLabelColor or Library.Scheme.FontColor,
+                TextColor3 = (typeof(TabLabelColor) == "string" and Library.Scheme[TabLabelColor] ~= nil and TabLabelColor) or (typeof(TabLabelColor) == "Color3" and TabLabelColor) or "FontColor",
                 TextTransparency = 0.5,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 Visible = not IsCompact,
@@ -14522,9 +14522,11 @@ function Library:CreateWindow(WindowInfo)
             if Icon then
                 local ResolvedIconColor = TabIconColor
                 if typeof(ResolvedIconColor) == "string" then
-                    ResolvedIconColor = Library.Scheme[ResolvedIconColor] or Color3.new(1, 1, 1)
+                    if Library.Scheme[ResolvedIconColor] == nil then
+                        ResolvedIconColor = Color3.new(1, 1, 1)
+                    end
                 elseif typeof(ResolvedIconColor) ~= "Color3" then
-                    ResolvedIconColor = Icon.Custom and Color3.new(1, 1, 1) or Library.Scheme.AccentColor
+                    ResolvedIconColor = Icon.Custom and Color3.new(1, 1, 1) or "AccentColor"
                 end
                 TabIcon = New("ImageLabel", {
                     Image = Icon.Url,
@@ -18473,6 +18475,10 @@ function Library:CreateWindow(WindowInfo)
     end))
 
     Library.Window = Window
+    if StartTheme ~= false and not Library.ThemeManagerApplied then
+        Library:SetTheme(StartTheme)
+    end
+
     return Window
 end
 
