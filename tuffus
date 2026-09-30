@@ -196,7 +196,16 @@ local function MergeFluentThemes(Library)
     end
 
     for _, Name in Library:GetThemeNames() do
-        if Name == "Normal" or ThemeManager.BuiltInThemes[Name] then continue end
+        if Name == "Normal" then continue end
+
+        local Existing = ThemeManager.BuiltInThemes[Name]
+        if Existing then
+            --// Built-in Obsidian themes (BBot, Nord, ...) get their custom shine; "Default" stays plain
+            if Name ~= "Default" then
+                Existing[2].FluentTheme = Name
+            end
+            continue
+        end
 
         local Scheme = Library:GetThemeScheme(Name)
         if not Scheme then continue end
