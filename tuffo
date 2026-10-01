@@ -12496,7 +12496,11 @@ function Library:CreateAnimatedBackground(Parent: GuiObject, Info, Corner: numbe
     pcall(function()
         Root.Interactable = false
     end)
-    table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, Corner or Library.CornerRadius), Parent = Root }))
+    --// ClipsDescendants only clips to a rectangle, so every layer needs its own matching corner
+    local function Round(Target: GuiObject)
+        table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, Corner or Library.CornerRadius), Parent = Target }))
+    end
+    Round(Root)
 
     local function BaseColors()
         if Background.BaseSequence then
@@ -12517,6 +12521,7 @@ function Library:CreateAnimatedBackground(Parent: GuiObject, Info, Corner: numbe
         ZIndex = Info.ZIndex,
         Parent = Root,
     })
+    Round(Base)
     local BaseGradient = New("UIGradient", { Color = BaseColors(), Rotation = 60, Parent = Base })
 
     local Shine = New("Frame", {
@@ -12526,6 +12531,7 @@ function Library:CreateAnimatedBackground(Parent: GuiObject, Info, Corner: numbe
         ZIndex = Info.ZIndex,
         Parent = Root,
     })
+    Round(Shine)
     local Gradient = New("UIGradient", {
         Color = Background.Colors or SchemeColors(),
         Transparency = NumberSequence.new({
@@ -12537,7 +12543,7 @@ function Library:CreateAnimatedBackground(Parent: GuiObject, Info, Corner: numbe
     })
 
     if Info.Noise then
-        New("ImageLabel", {
+        local Noise = New("ImageLabel", {
             Image = "rbxassetid://9968344105",
             ImageTransparency = 0.98,
             ScaleType = Enum.ScaleType.Tile,
@@ -12546,6 +12552,7 @@ function Library:CreateAnimatedBackground(Parent: GuiObject, Info, Corner: numbe
             ZIndex = Info.ZIndex,
             Parent = Root,
         })
+        Round(Noise)
     end
 
     local Orbs = {}
@@ -12590,8 +12597,8 @@ function Library:CreateAnimatedBackground(Parent: GuiObject, Info, Corner: numbe
         local OrbTime = Time * Info.OrbSpeed * 3
         for _, Orb in Orbs do
             Orb.Frame.Position = UDim2.fromScale(
-                math.clamp(Orb.Base.X + math.sin(OrbTime * Orb.Rate.X + Orb.Phase.X) * 0.35, 0, 1),
-                math.clamp(Orb.Base.Y + math.cos(OrbTime * Orb.Rate.Y + Orb.Phase.Y) * 0.35, 0, 1)
+                math.clamp(Orb.Base.X + math.sin(OrbTime * Orb.Rate.X + Orb.Phase.X) * 0.35, 0.12, 0.88),
+                math.clamp(Orb.Base.Y + math.cos(OrbTime * Orb.Rate.Y + Orb.Phase.Y) * 0.35, 0.12, 0.88)
             )
             Orb.Frame.ImageColor3 = Orb.Accent and Library.Scheme.AccentColor or Library.Scheme.OutlineColor
         end
