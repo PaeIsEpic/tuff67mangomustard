@@ -12709,7 +12709,7 @@ function Library:CreateWindow(WindowInfo)
     WindowInfo = Library:Validate(WindowInfo, Templates.Window)
     local StartTheme = WindowInfo.Theme
     if StartTheme == nil then
-        StartTheme = Library.CurrentTheme or "Orange"
+        StartTheme = Library.CurrentTheme or "Normal"
     end
     if StartTheme ~= false then
         Library:SetTheme(StartTheme)
@@ -12929,7 +12929,11 @@ function Library:CreateWindow(WindowInfo)
         })
         table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, WindowInfo.CornerRadius), Parent = Library.ThemeImage }))
 
-        Library.AnimatedBackground = Library:CreateAnimatedBackground(MainFrame, WindowInfo.AnimatedBackground, WindowInfo.CornerRadius)
+        local AnimatedInfo = WindowInfo.AnimatedBackground
+        if AnimatedInfo == nil and StartTheme == false then
+            AnimatedInfo = false --// Theme = false: leave the window completely vanilla
+        end
+        Library.AnimatedBackground = Library:CreateAnimatedBackground(MainFrame, AnimatedInfo, WindowInfo.CornerRadius)
         if StartTheme ~= false then
             Library:SetTheme(StartTheme)
         end
