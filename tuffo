@@ -12280,7 +12280,7 @@ Library.Themes = {
     ["Deep Violet"] = { Background={20,20,20}, Accent={97,62,167}, Outline={110,90,130}, Font={240,240,240}, Base={{0,85,57,139},{1,40,25,65}}, Shine={Speed=0.5,Rot=25,Colors={{0,40,25,65},{0.5,160,120,220},{1,40,25,65}}}, Image="rbxassetid://136310484943077" },
     ["Ash Gray"] = { Background={60,60,60}, Accent={150,150,150}, Outline={90,90,90}, Font={240,240,240}, Base={{0,75,75,75},{1,35,35,35}}, Shine={Speed=0.4,Rot=20,Colors={{0,40,40,40},{0.5,105,105,105},{1,40,40,40}}} },
     ["Charcoal"] = { Background={20,20,20}, Accent={102,102,102}, Outline={60,60,60}, Font={240,240,240}, Base={{0,30,30,30},{1,10,10,10}}, Shine={Speed=0.45,Rot=25,Colors={{0,20,20,20},{0.5,150,150,150},{1,20,20,20}}} },
-    ["Pearl White"] = { Background={240,240,240}, Accent={214,214,214}, Outline={200,200,200}, Font={20,20,20}, Base={{0,255,255,255},{1,220,220,220}}, Shine={Speed=0.4,Rot=20,Colors={{0,200,200,200},{0.5,255,255,255},{1,200,200,200}}} },
+    ["Pearl White"] = { Background={232,235,242}, Main={247,248,252}, Accent={94,106,152}, Outline={186,192,206}, Font={24,28,38}, Base={{0,226,231,246},{0.5,214,220,238},{1,202,210,232}}, Shine={Speed=0.35,Rot=16,Colors={{0,200,212,242},{0.5,232,214,240},{1,200,212,242}}} },
     ["Blood Red"] = { Background={35,8,10}, Accent={180,10,20}, Outline={140,15,25}, Font={255,230,230}, Base={{0,130,12,20},{1,28,5,8}}, Shine={Speed=0.5,Rot=25,Colors={{0,71,0,0},{0.5,159,0,0},{1,71,0,0}}}, Image="rbxassetid://121343473918667" },
     ["Neon Purple"] = { Background={5,0,15}, Accent={180,0,255}, Outline={140,0,255}, Font={252,245,255}, Base={{0,5,0,15},{1,45,0,160}}, Shine={Speed=0.4,Rot=20,Colors={{0,32,5,137},{0.5,171,32,253},{1,32,5,137}}} },
     ["Deep Ocean"] = { Background={15,30,45}, Accent={0,150,200}, Outline={0,100,150}, Font={240,248,255}, Base={{0,0,80,120},{1,10,25,40}}, Shine={Speed=0.5,Rot=25,Colors={{0,0,60,90},{0.5,0,200,255},{1,0,60,90}}} },
@@ -12288,8 +12288,26 @@ Library.Themes = {
     ["Royal Blue"] = { Background={10,25,50}, Accent={15,82,186}, Outline={10,65,150}, Font={220,235,255}, Base={{0,12,70,160},{1,8,20,45}}, Shine={Speed=0.5,Rot=25,Colors={{0,20,40,85},{0.5,50,120,230},{1,20,40,85}}} },
     ["Galaxy Purple"] = { Background={12,5,25}, Accent={160,60,220}, Outline={120,40,185}, Font={242,232,255}, Base={{0,110,35,175},{1,8,3,20}}, Shine={Speed=0.5,Rot=25,Colors={{0,48,18,85},{0.5,195,100,255},{1,48,18,85}}} },
     ["Cosmic Violet"] = { Background={12,10,22}, Accent={80,60,140}, Outline={50,35,110}, Font={230,225,245}, Base={{0,45,30,100},{1,8,6,16}}, Shine={Speed=0.5,Rot=25,Colors={{0,35,25,65},{0.5,115,90,175},{1,35,25,65}}} },
+    ["BBot"] = { Background={35,35,35}, Main={30,30,30}, Accent={126,72,163}, Outline={20,20,20}, Font={255,255,255}, Base={{0.0,95,55,125},{0.5,48,38,58},{1.0,35,35,35}}, Shine={Speed=0.4,Rot=18,Colors={{0.0,126,72,163},{0.333,90,50,125},{0.667,150,95,190},{1.0,126,72,163}}} },
+    ["Fatality"] = { Background={25,19,53}, Main={30,24,66}, Accent={197,7,84}, Outline={60,53,93}, Font={255,255,255}, Base={{0.0,160,10,75},{0.5,65,22,90},{1.0,25,19,53}}, Shine={Speed=0.75,Rot=32,Colors={{0.0,197,7,84},{0.333,130,25,165},{0.667,80,20,140},{1.0,197,7,84}}} },
+    ["Jester"] = { Background={28,28,28}, Main={36,36,36}, Accent={219,68,103}, Outline={55,55,55}, Font={255,255,255}, Base={{0.0,150,40,68},{0.5,62,30,38},{1.0,28,28,28}}, Shine={Speed=0.55,Rot=24,Colors={{0.0,219,68,103},{0.333,140,30,60},{0.667,255,110,140},{1.0,219,68,103}}} },
+    ["Mint"] = { Background={28,28,28}, Main={36,36,36}, Accent={61,180,136}, Outline={55,55,55}, Font={255,255,255}, Base={{0.0,40,125,98},{0.5,30,55,48},{1.0,28,28,28}}, Shine={Speed=0.45,Rot=16,Colors={{0.0,61,180,136},{0.333,34,120,98},{0.667,110,220,175},{1.0,61,180,136}}} },
+    ["Tokyo Night"] = { Background={22,22,31}, Main={25,25,37}, Accent={103,89,179}, Outline={50,50,50}, Font={255,255,255}, Base={{0.0,62,52,125},{0.5,30,30,52},{1.0,22,22,31}}, Shine={Speed=0.5,Rot=28,Colors={{0.0,103,89,179},{0.333,122,162,247},{0.667,187,154,247},{1.0,103,89,179}}} },
+    ["Ubuntu"] = { Background={50,50,50}, Main={62,62,62}, Accent={226,88,30}, Outline={25,25,25}, Font={255,255,255}, Base={{0.0,205,85,30},{0.5,96,40,82},{1.0,50,50,50}}, Shine={Speed=0.5,Rot=20,Colors={{0.0,226,88,30},{0.5,119,33,111},{1.0,226,88,30}}} },
+    ["Quartz"] = { Background={29,27,38}, Main={35,35,48}, Accent={66,110,135}, Outline={39,35,47}, Font={255,255,255}, Base={{0.0,52,88,112},{0.5,38,34,56},{1.0,29,27,38}}, Shine={Speed=0.35,Rot=22,Colors={{0.0,66,110,135},{0.5,112,92,165},{1.0,66,110,135}}} },
+    ["Nord"] = { Background={46,52,64}, Main={59,66,82}, Accent={136,192,208}, Outline={76,86,106}, Font={236,239,244}, Base={{0.0,94,129,172},{0.5,62,72,90},{1.0,46,52,64}}, Shine={Speed=0.3,Rot=14,Colors={{0.0,136,192,208},{0.333,129,161,193},{0.667,163,190,140},{1.0,136,192,208}}} },
+    ["Dracula"] = { Background={40,42,54}, Main={68,71,90}, Accent={255,121,198}, Outline={98,114,164}, Font={248,248,242}, Base={{0.0,105,62,125},{0.5,68,71,90},{1.0,40,42,54}}, Shine={Speed=0.55,Rot=26,Colors={{0.0,255,121,198},{0.333,189,147,249},{0.667,139,233,253},{1.0,255,121,198}}} },
+    ["Monokai"] = { Background={30,31,28}, Main={39,40,34}, Accent={249,38,114}, Outline={73,72,62}, Font={248,248,242}, Base={{0.0,125,28,62},{0.5,55,52,42},{1.0,30,31,28}}, Shine={Speed=0.6,Rot=30,Colors={{0.0,249,38,114},{0.333,253,151,31},{0.667,166,226,46},{1.0,249,38,114}}} },
+    ["Gruvbox"] = { Background={40,40,40}, Main={60,56,54}, Accent={251,73,52}, Outline={80,73,69}, Font={235,219,178}, Base={{0.0,152,50,36},{0.5,84,72,66},{1.0,40,40,40}}, Shine={Speed=0.4,Rot=18,Colors={{0.0,251,73,52},{0.333,254,128,25},{0.667,250,189,47},{1.0,251,73,52}}} },
+    ["Solarized"] = { Background={0,43,54}, Main={7,54,66}, Accent={203,75,22}, Outline={88,110,117}, Font={131,148,150}, Base={{0.0,30,105,125},{0.5,7,54,66},{1.0,0,43,54}}, Shine={Speed=0.3,Rot=12,Colors={{0.0,203,75,22},{0.333,38,139,210},{0.667,42,161,152},{1.0,203,75,22}}} },
+    ["Catppuccin"] = { Background={30,30,46}, Main={48,45,65}, Accent={245,194,231}, Outline={87,82,104}, Font={217,224,238}, Base={{0.0,112,82,122},{0.5,50,46,68},{1.0,30,30,46}}, Shine={Speed=0.4,Rot=20,Colors={{0.0,245,194,231},{0.333,203,166,247},{0.667,137,180,250},{1.0,245,194,231}}} },
+    ["One Dark"] = { Background={33,37,43}, Main={40,44,52}, Accent={198,120,221}, Outline={92,99,112}, Font={171,178,191}, Base={{0.0,90,60,112},{0.5,42,46,56},{1.0,33,37,43}}, Shine={Speed=0.4,Rot=22,Colors={{0.0,198,120,221},{0.333,97,175,239},{0.667,152,195,121},{1.0,198,120,221}}} },
+    ["Cyberpunk"] = { Background={26,26,46}, Main={38,35,53}, Accent={0,255,159}, Outline={65,60,94}, Font={249,249,249}, Base={{0.0,0,140,100},{0.5,72,22,92},{1.0,26,26,46}}, Shine={Speed=0.95,Rot=40,Colors={{0.0,0,255,159},{0.333,255,0,110},{0.667,0,184,255},{1.0,0,255,159}}} },
+    ["Oceanic Next"] = { Background={22,35,42}, Main={27,43,52}, Accent={102,153,204}, Outline={52,61,70}, Font={216,222,233}, Base={{0.0,62,102,132},{0.5,28,45,54},{1.0,22,35,42}}, Shine={Speed=0.35,Rot=16,Colors={{0.0,102,153,204},{0.333,95,179,179},{0.667,197,148,197},{1.0,102,153,204}}} },
+    ["Material"] = { Background={21,21,21}, Main={33,33,33}, Accent={130,170,255}, Outline={66,66,66}, Font={238,255,255}, Base={{0.0,62,82,132},{0.5,40,40,40},{1.0,21,21,21}}, Shine={Speed=0.45,Rot=22,Colors={{0.0,130,170,255},{0.333,199,146,234},{0.667,137,221,255},{1.0,130,170,255}}} },
 }
-Library.ThemeOrder = { "Normal", "Gold Navy", "AMOLED", "RGB", "Neon Cyber", "Arctic Frost", "Cotton Candy", "Orange", "Cyanic", "Amber Glow", "Bloomings", "Crimson", "Gold", "Deep Violet", "Ash Gray", "Charcoal", "Pearl White", "Blood Red", "Neon Purple", "Deep Ocean", "Midnight Blue", "Royal Blue", "Galaxy Purple", "Cosmic Violet" }
+Library.Themes["Default"] = Library.Themes["Normal"]
+Library.ThemeOrder = { "Normal", "Gold Navy", "AMOLED", "RGB", "Neon Cyber", "Arctic Frost", "Cotton Candy", "Orange", "Cyanic", "Amber Glow", "Bloomings", "Crimson", "Gold", "Deep Violet", "Ash Gray", "Charcoal", "Pearl White", "Blood Red", "Neon Purple", "Deep Ocean", "Midnight Blue", "Royal Blue", "Galaxy Purple", "Cosmic Violet", "BBot", "Fatality", "Jester", "Mint", "Tokyo Night", "Ubuntu", "Quartz", "Nord", "Dracula", "Monokai", "Gruvbox", "Solarized", "Catppuccin", "One Dark", "Cyberpunk", "Oceanic Next", "Material" }
 Library.CurrentTheme = nil
 Library.ThemeImageTransparency = 0.88
 
@@ -12385,6 +12403,9 @@ function Library:SetTheme(Name: string)
         local Shine = Theme.Shine
         Animated:SetSpeed(Shine and Shine.Speed or 0.6, Shine and Shine.Rot or 20)
         Animated:SetColors(ThemeSequence(Shine and Shine.Colors), ThemeSequence(Theme.Base))
+        local Bg = Library.Scheme.BackgroundColor
+        local IsLight = (0.299 * Bg.R + 0.587 * Bg.G + 0.114 * Bg.B) > 0.5
+        Animated:SetTransparency(IsLight and 0.97 or nil)
         Animated:SetEnabled(Theme.Animated ~= false and Library.AnimatedBackgroundUserEnabled ~= false)
     end
 
