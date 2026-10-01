@@ -952,7 +952,7 @@ function ThemeManager:CreateThemeManager(Themesbox: any)
         Text = "Theme list", 
 
         Values = BuiltInThemesNames,
-        Default = if ThemeManager.BuiltInThemes[ThemeManager.Library.CurrentTheme or ""] then ThemeManager.Library.CurrentTheme else nil,
+        Default = if ThemeManager.BuiltInThemes[ThemeManager.Library.CurrentTheme or ""] then ThemeManager.Library.CurrentTheme elseif ThemeManager.Library.CurrentTheme == "Normal" then "Default" else nil,
         AllowNull = true,
         Multi = false,
 
