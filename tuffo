@@ -519,6 +519,7 @@ local Templates = {
         --// Snapping \\--
         MinSidebarWidth = 128,
         ExpandedSidebarWidth = 130,
+        AutoSidebarWidth = true,
         SidebarToggleButton = true,
         SidebarCompactWidth = 48,
         SidebarCollapseThreshold = 0.5,
@@ -14542,6 +14543,48 @@ function Library:CreateWindow(WindowInfo)
         Window:SetSidebarCollapsed(not IsCompact, true)
     end
 
+    --// Grows the sidebar so the longest tab title fits (never shrinks a width the user chose)
+    function Window:FitSidebar()
+        if not WindowInfo.AutoSidebarWidth then
+            return
+        end
+
+        local Needed = 0
+        for _, Button in Library.TabButtons do
+            local Label = Button.Label
+            if Button.Icon and Label and Label.Parent and Label.Text ~= "" then
+                local Success, Width = pcall(Library.GetTextBounds, Library, Label.Text, Label.FontFace, Label.TextSize, 100000)
+                if Success then
+                    Needed = math.max(Needed, Width + 12 + 30 + 12 + 36 + (Button.Chevron and 22 or 0))
+                end
+            end
+        end
+
+        Needed = math.clamp(math.ceil(Needed), WindowInfo.MinSidebarWidth, math.floor(MainFrame.Size.X.Offset * 0.5))
+        if Needed <= LastExpandedWidth then
+            return
+        end
+
+        if IsCompact then
+            LastExpandedWidth = Needed
+        else
+            Window:SetSidebarWidth(Needed)
+        end
+    end
+
+    local FitQueued = false
+    function Window:QueueFitSidebar()
+        if FitQueued then
+            return
+        end
+
+        FitQueued = true
+        task.defer(function()
+            FitQueued = false
+            Window:FitSidebar()
+        end)
+    end
+
     function Window:ShowTabInfo(Name, Description)
         --// RichText is on by default, so the name can carry its own weight
         CurrentTabLabel.Text = `<b>{Name}</b>`
@@ -14682,6 +14725,7 @@ function Library:CreateWindow(WindowInfo)
                 Icon = TabIcon,
             }
             table.insert(Library.TabButtons, TabButtonInfo)
+            Window:QueueFitSidebar()
 
             --// Tab Canvas \\--
             TabCanvas = New("CanvasGroup", {
@@ -17278,6 +17322,7 @@ function Library:CreateWindow(WindowInfo)
                 Padding = ButtonPadding,
                 Icon = TabIcon,
             })
+            Window:QueueFitSidebar()
 
             --// Tab Canvas \\--
             TabCanvas = New("CanvasGroup", {
