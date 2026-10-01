@@ -5829,6 +5829,12 @@ do
                 return
             end
 
+            --// Re-entrancy guard: a callback that calls SetValue on its own toggle can't recurse forever
+            local Depth = Toggle.CallbackDepth or 0
+            if Depth > 0 and (Toggle.Value == Value or Depth >= 4) then
+                return
+            end
+
             Toggle.Value = Value
             Toggle:Display()
 
@@ -5842,7 +5848,9 @@ do
             Library:UpdateDependencyBoxes()
 
             if not Toggle.AnyKeyPickerPicking then
+                Toggle.CallbackDepth = Depth + 1
                 Toggle:RunChanged()
+                Toggle.CallbackDepth = math.max((Toggle.CallbackDepth or 1) - 1, 0)
             end
         end
 
@@ -6147,6 +6155,12 @@ do
                 return
             end
 
+            --// Re-entrancy guard: a callback that calls SetValue on its own toggle can't recurse forever
+            local Depth = Toggle.CallbackDepth or 0
+            if Depth > 0 and (Toggle.Value == Value or Depth >= 4) then
+                return
+            end
+
             Toggle.Value = Value
             Toggle:Display()
 
@@ -6160,7 +6174,9 @@ do
             Library:UpdateDependencyBoxes()
 
             if not Toggle.AnyKeyPickerPicking then
+                Toggle.CallbackDepth = Depth + 1
                 Toggle:RunChanged()
+                Toggle.CallbackDepth = math.max((Toggle.CallbackDepth or 1) - 1, 0)
             end
         end
 
