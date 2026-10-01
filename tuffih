@@ -6,6 +6,7 @@ local clonefunction = (clonefunction or copyfunction or function(func)
 end)
 
 local HttpService: HttpService = cloneref(game:GetService("HttpService"))
+local RunService: RunService = cloneref(game:GetService("RunService"))
 
 --// Fix is_____ functions for shitsploits, those functions should never error, only return a boolean. (why is this still a problem in the big 2026)
 local isfolder, isfile, listfiles = isfolder, isfile, listfiles
@@ -39,6 +40,12 @@ local SaveManager = {
     Ignore = {},
     LoadingOrder = {},
     UseLoadingOrder = false,
+
+    --// Load tuning (prevents freezes / crashes with big configs)
+    LoadBudgetMs = 6,        -- max milliseconds of element loading per frame
+    SkipUnchanged = true,    -- don't re-fire callbacks for values that already match
+    LoadToken = 0,
+    IsLoading = false,
 
     AutoloadConfig = nil
 }
@@ -108,7 +115,7 @@ local ElementParser = {}; do
         function(Element: any?, Data: any)
             if not Element then return end
             if Element.Value == Data.value then
-                Element:RunChanged()
+                if not SaveManager.SkipUnchanged then Element:RunChanged() end
                 return
             end
             
@@ -124,7 +131,7 @@ local ElementParser = {}; do
         function(Element: any?, Data: any)
             if not Element then return end
             if Element.Value == Data.value then
-                Element:RunChanged()
+                if not SaveManager.SkipUnchanged then Element:RunChanged() end
                 return
             end
 
@@ -140,7 +147,7 @@ local ElementParser = {}; do
         function(Element: any?, Data: any)
             if not Element then return end
             if Element.Value == Data.value then
-                Element:RunChanged()
+                if not SaveManager.SkipUnchanged then Element:RunChanged() end
                 return
             end
             
@@ -186,7 +193,7 @@ local ElementParser = {}; do
             if typeof(Data.text) ~= "string" then return end
 
             if Element.Value == Data.text then
-                Element:RunChanged()
+                if not SaveManager.SkipUnchanged then Element:RunChanged() end
                 return
             end
 
@@ -654,10 +661,13 @@ function SaveManager:LoadJSON(Content: string)
     local IgnoreIndexes = SaveManager.Ignore
 
     if SaveManager.UseLoadingOrder == true and typeof(LoadingOrder) == "table" then
+        local Rank = {}
+        for Position, TypeName in LoadingOrder do
+            Rank[TypeName] = Rank[TypeName] or Position
+        end
+
         table.sort(Decoded.objects, function(a, b)
-            local aIndex = table.find(LoadingOrder, a.type) or math.huge
-            local bIndex = table.find(LoadingOrder, b.type) or math.huge
-            return aIndex < bIndex
+            return (Rank[a.type] or math.huge) < (Rank[b.type] or math.huge)
         end)
     end
 
@@ -676,7 +686,8 @@ function SaveManager:LoadJSON(Content: string)
         end
     end
 
-    --// Elements
+    --// Elements (queued, then applied in time slices so big configs can't freeze the game)
+    local Queue = {}
     for _, Option in Decoded.objects do
         if not Option.type then continue end
         if IgnoreIndexes[Option.idx] then continue end
@@ -684,8 +695,44 @@ function SaveManager:LoadJSON(Content: string)
         local Parser = ElementParser[Option.type]
         if not Parser then continue end
 
-        task.defer(Parser.Load, Option.idx, Option)
+        table.insert(Queue, { Parser = Parser, Data = Option })
     end
+
+    SaveManager.LoadToken += 1
+    local Token = SaveManager.LoadToken
+    SaveManager.IsLoading = true
+
+    task.spawn(function()
+        local Total, Position = #Queue, 1
+
+        while Position <= Total do
+            if Token ~= SaveManager.LoadToken then
+                return --// a newer load replaced this one
+            end
+
+            local Start = os.clock()
+            repeat
+                local Item = Queue[Position]
+                Position += 1
+
+                local Success, Err = pcall(Item.Parser.Load, Item.Data.idx, Item.Data)
+                if not Success then
+                    warn(`[SaveManager] Failed to load "{tostring(Item.Data.idx)}": {tostring(Err)}`)
+                end
+            until Position > Total or (os.clock() - Start) * 1000 >= SaveManager.LoadBudgetMs
+
+            if Position <= Total then
+                RunService.Heartbeat:Wait()
+            end
+        end
+
+        if Token == SaveManager.LoadToken then
+            SaveManager.IsLoading = false
+            if typeof(SaveManager.OnLoaded) == "function" then
+                task.spawn(SaveManager.OnLoaded)
+            end
+        end
+    end)
 
     return true
 end
