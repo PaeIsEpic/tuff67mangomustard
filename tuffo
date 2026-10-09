@@ -18546,7 +18546,7 @@ function Library:CreateWindow(WindowInfo)
                 BackgroundTransparency = 1,
                 Size = UDim2.fromScale(1, 0),
                 Parent = if IsNested
-                    then ParentObj.Container
+                    then (ParentObj.Container or ParentObj.Canvas)
                     else (Info.Side == 1 and Owner.Sides[1] or Owner.Sides[2]),
             })
             New("UIListLayout", {
@@ -18957,7 +18957,7 @@ function Library:CreateWindow(WindowInfo)
                 BackgroundTransparency = 1,
                 Size = UDim2.fromScale(1, 0),
                 Parent = if IsNested
-                    then ParentObj.Container
+                    then (ParentObj.Container or ParentObj.Canvas)
                     else (Info.Side == 1 and Owner.Sides[1] or Owner.Sides[2]),
             })
             local BoxHolderList = New("UIListLayout", {
@@ -20094,6 +20094,7 @@ function Library:CreateWindow(WindowInfo)
 
                 Window = Window,
                 Tab = Tab,
+                Container = SubCanvas,
                 Canvas = SubCanvas,
                 Button = Button,
                 Sides = {
