@@ -3083,7 +3083,14 @@ local SLIDER_TRACK_GRADIENT_TO = Color3.fromRGB(64, 64, 64)
 local SEARCHBOX_TEXT_INSET = 38
 
 function Library:PlayTabAnimation(Tab, Showing: boolean, OnComplete: (() -> ())?)
-    if type(Tab) ~= "table" or not Tab.Container then
+    local TabContainer
+    if typeof(Tab) == "Instance" then
+        TabContainer = Tab
+    elseif type(Tab) == "table" then
+        TabContainer = Tab.Container or Tab.Canvas
+    end
+
+    if not TabContainer then
         if OnComplete then
             OnComplete()
         end
@@ -3091,7 +3098,7 @@ function Library:PlayTabAnimation(Tab, Showing: boolean, OnComplete: (() -> ())?
         return
     end
 
-    local TabContainer = Tab.Container :: Frame
+    TabContainer = TabContainer :: Frame
     local Existing = ActiveTabTweens[TabContainer]
     if Existing then
         StopTween(Existing, true)
