@@ -18528,6 +18528,16 @@ function Library:CreateWindow(WindowInfo)
         local function AddTabbox(self, Info)
             Info = Library:Validate(Info, Templates.Tabbox)
             local ParentObj = self
+            local IsNested = ParentObj.Type == "Groupbox" or ParentObj.Type == "SubTab"
+
+            if typeof(Info.Side) == "string" then
+                local Side = SideIndex[string.lower(Info.Side)]
+                if not Side then
+                    error(string.format("Invalid side: %s", Info.Side))
+                end
+                Info.Side = Side
+            end
+
             --// Owner is the tab-like object holding this tabbox (Tab or SubTab)
             local Owner = if ParentObj.Type == "Groupbox" then ParentObj.Tab else ParentObj
 
@@ -18535,7 +18545,7 @@ function Library:CreateWindow(WindowInfo)
                 AutomaticSize = Enum.AutomaticSize.Y,
                 BackgroundTransparency = 1,
                 Size = UDim2.fromScale(1, 0),
-                Parent = if ParentObj.Type == "Groupbox"
+                Parent = if IsNested
                     then ParentObj.Container
                     else (Info.Side == 1 and Owner.Sides[1] or Owner.Sides[2]),
             })
@@ -18920,13 +18930,35 @@ function Library:CreateWindow(WindowInfo)
 
         function Tab:AddGroupbox(Info)
             --// `self` is either the Tab itself or one of its SubTabs
-            local Owner = self or Tab
+            if typeof(Info) == "string" then
+                Info = { Name = Info }
+            elseif typeof(Info) == "table" then
+                Info = table.clone(Info)
+            else
+                Info = {}
+            end
+            Info = Library:Validate(Info, Templates.Groupbox)
+
+            if typeof(Info.Side) == "string" then
+                local Side = SideIndex[string.lower(Info.Side)]
+                if not Side then
+                    error(string.format("Invalid side: %s", Info.Side))
+                end
+                Info.Side = Side
+            end
+            Info.Side = Info.Side or 1
+
+            local ParentObj = self or Tab
+            local IsNested = ParentObj.Type == "Groupbox" or ParentObj.Type == "SubTab"
+            local Owner = if ParentObj.Type == "Groupbox" then ParentObj.Tab else ParentObj
 
             local BoxHolder = New("Frame", {
                 AutomaticSize = Enum.AutomaticSize.Y,
                 BackgroundTransparency = 1,
                 Size = UDim2.fromScale(1, 0),
-                Parent = Info.Side == 1 and Owner.Sides[1] or Owner.Sides[2],
+                Parent = if IsNested
+                    then ParentObj.Container
+                    else (Info.Side == 1 and Owner.Sides[1] or Owner.Sides[2]),
             })
             local BoxHolderList = New("UIListLayout", {
                 Padding = UDim.new(0, 6),
