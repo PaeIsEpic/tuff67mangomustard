@@ -1598,12 +1598,12 @@ type IconModule = {
 
 local FetchIcons, Icons = pcall(function()
     return (loadstring(
-        game:HttpGet("https://raw.githubusercontent.com/notpoiu/lucide-roblox-direct/refs/heads/main/source.lua")
+        game:HttpGet("https://gitlab.com/upio/lucide-roblox-direct/-/raw/main/source.lua")
     ) :: () -> IconModule)()
 end)
 
 function Library:GetIcon(IconName: string)
-    if not FetchIcons or not Icons then
+    if not FetchIcons then
         return
     end
 
@@ -3614,8 +3614,13 @@ do
                 Position = UDim2.new(0, 0, 0, 0),
                 Text = KeyPicker.Value,
                 TextSize = 14,
+                FontFace = Picker.FontFace,
                 TextXAlignment = Enum.TextXAlignment.Center,
                 Parent = Picker,
+            })
+
+            Library:AddToRegistry(SlidingLabel, {
+                TextColor3 = "FontColor",
             })
         end
 
@@ -3732,7 +3737,6 @@ do
 
                 KeyPicker.Toggled = not KeyPicker.Toggled
                 KeyPicker:DoClick()
-                KeyPicker:Update()
             end)
 
             KeybindsToggle.Holder = Holder
@@ -3802,9 +3806,6 @@ do
                 Button.TextTransparency = 0
 
                 MenuTable:Close()
-                if KeyPicker.Update then
-                    KeyPicker:Update()
-                end
             end
 
             function ModeButton:Deselect()
@@ -7806,10 +7807,6 @@ do
 
         function Dropdown:SetValue(Value)
             if Info.Multi then
-                if typeof(Value) == "string" then
-                    Value = if Value == "" then {} else { [Value] = true }
-                end
-
                 local Table = {}
 				
                 for Val, Active in Value or {} do
@@ -12722,406 +12719,6 @@ function Library:SetAnimatedBackground(Value)
     if Library.AnimatedBackground then
         Library.AnimatedBackground:SetEnabled(Value)
     end
-end
-
---// Mini window (small draggable window for keybind reminders / quick actions) \\--
-local MiniWindowTemplate = {
-    Title = "Keybinds",
-    Width = 190,
-    Position = UDim2.fromOffset(12, 12),
-    Collapsible = true,
-    Collapsed = false,
-    Visible = true,
-}
-
-function Library:CreateMiniWindow(Info)
-    Info = Library:Validate(typeof(Info) == "table" and Info or { Title = Info }, MiniWindowTemplate)
-
-    local Mini = {
-        Rows = {},
-        Connections = {},
-        Destroyed = false,
-        Visible = Info.Visible,
-        Collapsed = Info.Collapsed,
-        Type = "MiniWindow",
-    }
-
-    local Holder = New("Frame", {
-        AutomaticSize = Enum.AutomaticSize.Y,
-        BackgroundColor3 = "BackgroundColor",
-        Position = Info.Position,
-        Size = UDim2.fromOffset(Info.Width, 0),
-        Visible = Info.Visible,
-        ZIndex = 10,
-        Parent = Library.ScreenGui,
-    })
-    table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, Library.CornerRadius), Parent = Holder }))
-    table.insert(Library.Scales, New("UIScale", { Parent = Holder }))
-    Library:AddOutline(Holder)
-
-    local Title = New("TextLabel", {
-        BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 30),
-        Text = Info.Title,
-        TextSize = 15,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = Holder,
-    })
-    New("UIPadding", { PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 30), Parent = Title })
-
-    Library:MakeLine(Holder, { Position = UDim2.fromOffset(0, 30), Size = UDim2.new(1, 0, 0, 1) })
-
-    local Body = New("Frame", {
-        AutomaticSize = Enum.AutomaticSize.Y,
-        BackgroundTransparency = 1,
-        Position = UDim2.fromOffset(0, 31),
-        Size = UDim2.new(1, 0, 0, 0),
-        Visible = not Info.Collapsed,
-        Parent = Holder,
-    })
-    New("UIListLayout", { Padding = UDim.new(0, 5), Parent = Body })
-    New("UIPadding", {
-        PaddingBottom = UDim.new(0, 7),
-        PaddingLeft = UDim.new(0, 7),
-        PaddingRight = UDim.new(0, 7),
-        PaddingTop = UDim.new(0, 7),
-        Parent = Body,
-    })
-
-    local Arrow
-    if Info.Collapsible then
-        local Collapse = New("TextButton", {
-            AnchorPoint = Vector2.new(1, 0),
-            BackgroundTransparency = 1,
-            Position = UDim2.new(1, -4, 0, 0),
-            Size = UDim2.fromOffset(26, 30),
-            Text = "",
-            ZIndex = 11,
-            Parent = Holder,
-        })
-        local Icon = Library:GetIcon("chevron-down")
-        Arrow = New("ImageLabel", {
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            BackgroundTransparency = 1,
-            Image = Icon and Icon.Url or "",
-            ImageColor3 = "AccentColor",
-            ImageRectOffset = Icon and Icon.ImageRectOffset or Vector2.zero,
-            ImageRectSize = Icon and Icon.ImageRectSize or Vector2.zero,
-            Position = UDim2.fromScale(0.5, 0.5),
-            Rotation = Info.Collapsed and -90 or 0,
-            Size = UDim2.fromOffset(14, 14),
-            ZIndex = 12,
-            Parent = Collapse,
-        })
-        table.insert(Mini.Connections, Collapse.MouseButton1Click:Connect(function()
-            Mini:SetCollapsed(not Mini.Collapsed)
-        end))
-    end
-
-    Library:MakeDraggable(Holder, Title, true)
-    if not table.find(Library.DraggableElements, Holder) then
-        table.insert(Library.DraggableElements, Holder)
-    end
-
-    Mini.Holder, Mini.Body = Holder, Body
-
-    --// Helpers
-    local function ParseKey(Key)
-        if typeof(Key) == "EnumItem" then
-            return Key
-        end
-        return typeof(Key) == "string" and Enum.KeyCode[Key] or nil
-    end
-
-    local function KeyText(Key)
-        if typeof(Key) == "EnumItem" then
-            return Key.Name
-        end
-        return tostring(Key or "")
-    end
-
-    local function NewRow(Height)
-        return New("Frame", {
-            BackgroundTransparency = 1,
-            Size = UDim2.new(1, 0, 0, Height),
-            Parent = Body,
-        })
-    end
-
-    local function KeyBadge(Parent, Key)
-        return New("TextLabel", {
-            AnchorPoint = Vector2.new(1, 0.5),
-            BackgroundTransparency = 1,
-            Position = UDim2.new(1, -2, 0.5, 0),
-            Size = UDim2.new(0, 70, 1, 0),
-            Text = Key and Key ~= "" and `[{KeyText(Key)}]` or "",
-            TextColor3 = "AccentColor",
-            TextSize = 13,
-            TextXAlignment = Enum.TextXAlignment.Right,
-            Parent = Parent,
-        })
-    end
-
-    local function BindKey(Row, Key, Func)
-        local KeyCode = ParseKey(Key)
-        if not KeyCode then
-            return
-        end
-
-        table.insert(Mini.Connections, Library:GiveSignal(game:GetService("UserInputService").InputBegan:Connect(function(Input, Processed)
-            if not Processed and Input.KeyCode == KeyCode and not Mini.Destroyed then
-                Func()
-            end
-        end)))
-    end
-
-    local function Finish(Row, Frame, Idx)
-        Row.Frame = Frame
-        function Row:SetVisible(Visible)
-            Frame.Visible = Visible
-        end
-        function Row:Destroy()
-            local At = table.find(Mini.Rows, Row)
-            if At then
-                table.remove(Mini.Rows, At)
-            end
-            if Idx and Library.Toggles[Idx] == Row then
-                Library.Toggles[Idx] = nil
-            end
-            Frame:Destroy()
-        end
-        table.insert(Mini.Rows, Row)
-        return Row
-    end
-
-    --// Toggle row: [box] Text ............ [KEY]
-    function Mini:AddToggle(Idx, RowInfo)
-        if typeof(Idx) == "table" then
-            Idx, RowInfo = nil, Idx
-        end
-        RowInfo = RowInfo or {}
-
-        local Frame = NewRow(22)
-        local Button = New("TextButton", {
-            BackgroundTransparency = 1,
-            Size = UDim2.fromScale(1, 1),
-            Text = "",
-            Parent = Frame,
-        })
-
-        local Box = New("Frame", {
-            AnchorPoint = Vector2.new(0, 0.5),
-            BackgroundColor3 = "MainColor",
-            Position = UDim2.fromOffset(0, 11),
-            Size = UDim2.fromOffset(16, 16),
-            Parent = Button,
-        })
-        table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, math.max(Library.CornerRadius - 2, 2)), Parent = Box }))
-        New("UIStroke", { Color = "OutlineColor", Parent = Box })
-
-        local Label = New("TextLabel", {
-            BackgroundTransparency = 1,
-            Position = UDim2.fromOffset(24, 0),
-            Size = UDim2.new(1, -96, 1, 0),
-            Text = RowInfo.Text or "Toggle",
-            TextSize = 14,
-            TextTruncate = Enum.TextTruncate.AtEnd,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            Parent = Button,
-        })
-        local Badge = KeyBadge(Button, RowInfo.Keybind)
-
-        local Toggle = { Type = "Toggle", Value = RowInfo.Default == true, Callback = RowInfo.Callback or function() end, Changed = nil }
-
-        local function Display()
-            local Key = Toggle.Value and "AccentColor" or "MainColor"
-            if Library.Registry[Box] then
-                Library.Registry[Box].BackgroundColor3 = Key
-            end
-            game:GetService("TweenService"):Create(Box, Library.TweenInfo, { BackgroundColor3 = Library.Scheme[Key] }):Play()
-        end
-
-        function Toggle:OnChanged(Func)
-            Toggle.Changed = Func
-        end
-        function Toggle:RunChanged()
-            Library:SafeCallback(Toggle.Callback, Toggle.Value)
-            if Toggle.Changed then
-                Library:SafeCallback(Toggle.Changed, Toggle.Value)
-            end
-        end
-        function Toggle:SetValue(Value)
-            Value = Value == true
-            if Toggle.Busy and Toggle.Value == Value then
-                return --// re-entrancy guard
-            end
-            Toggle.Value = Value
-            Display()
-            Toggle.Busy = true
-            Toggle:RunChanged()
-            Toggle.Busy = false
-        end
-        function Toggle:SetText(Text)
-            Label.Text = Text
-        end
-        function Toggle:SetKeybind(Key)
-            Badge.Text = Key and Key ~= "" and `[{KeyText(Key)}]` or ""
-        end
-
-        Box.BackgroundColor3 = Library.Scheme[Toggle.Value and "AccentColor" or "MainColor"]
-        if Library.Registry[Box] then
-            Library.Registry[Box].BackgroundColor3 = Toggle.Value and "AccentColor" or "MainColor"
-        end
-
-        table.insert(Mini.Connections, Button.MouseButton1Click:Connect(function()
-            Toggle:SetValue(not Toggle.Value)
-        end))
-        if RowInfo.Bind then
-            BindKey(Toggle, RowInfo.Keybind, function()
-                Toggle:SetValue(not Toggle.Value)
-            end)
-        end
-
-        if Idx ~= nil then
-            Library.Toggles[Idx] = Toggle
-        end
-        return Finish(Toggle, Frame, Idx)
-    end
-
-    --// Button row: [ Text ........ KEY ]
-    function Mini:AddButton(RowInfo)
-        if typeof(RowInfo) == "string" then
-            RowInfo = { Text = RowInfo }
-        end
-        RowInfo = RowInfo or {}
-
-        local Frame = NewRow(26)
-        local Button = New("TextButton", {
-            BackgroundColor3 = "MainColor",
-            Size = UDim2.fromScale(1, 1),
-            Text = "",
-            Parent = Frame,
-        })
-        table.insert(Library.Corners, New("UICorner", { CornerRadius = UDim.new(0, math.max(Library.CornerRadius - 2, 2)), Parent = Button }))
-        New("UIStroke", { Color = "OutlineColor", Parent = Button })
-
-        local Label = New("TextLabel", {
-            BackgroundTransparency = 1,
-            Position = UDim2.fromOffset(8, 0),
-            Size = UDim2.new(1, -78, 1, 0),
-            Text = RowInfo.Text or "Button",
-            TextSize = 14,
-            TextTruncate = Enum.TextTruncate.AtEnd,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            Parent = Button,
-        })
-        local Badge = KeyBadge(Button, RowInfo.Keybind)
-        Badge.Position = UDim2.new(1, -6, 0.5, 0)
-
-        local Row = { Type = "Button", Func = RowInfo.Func or RowInfo.Callback or function() end }
-
-        function Row:Fire()
-            Library:SafeCallback(Row.Func)
-        end
-        function Row:SetText(Text)
-            Label.Text = Text
-        end
-        function Row:SetKeybind(Key)
-            Badge.Text = Key and Key ~= "" and `[{KeyText(Key)}]` or ""
-        end
-
-        table.insert(Mini.Connections, Button.MouseButton1Click:Connect(function()
-            Row:Fire()
-        end))
-        if RowInfo.Bind then
-            BindKey(Row, RowInfo.Keybind, function()
-                Row:Fire()
-            end)
-        end
-
-        return Finish(Row, Frame)
-    end
-
-    --// Plain text row
-    function Mini:AddLabel(Text)
-        local Frame = NewRow(18)
-        local Label = New("TextLabel", {
-            BackgroundTransparency = 1,
-            Size = UDim2.fromScale(1, 1),
-            Text = tostring(Text or ""),
-            TextSize = 14,
-            TextTransparency = 0.25,
-            TextTruncate = Enum.TextTruncate.AtEnd,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            Parent = Frame,
-        })
-
-        local Row = { Type = "Label" }
-        function Row:SetText(NewText)
-            Label.Text = tostring(NewText)
-        end
-        return Finish(Row, Frame)
-    end
-
-    function Mini:AddDivider()
-        local Frame = NewRow(1)
-        Library:MakeLine(Frame, { Position = UDim2.fromScale(0, 0), Size = UDim2.new(1, 0, 0, 1) })
-        return Finish({ Type = "Divider" }, Frame)
-    end
-
-    --// Window methods
-    function Mini:SetTitle(Text)
-        Title.Text = tostring(Text)
-    end
-
-    function Mini:SetVisible(Visible)
-        Mini.Visible = Visible == true
-        Holder.Visible = Mini.Visible
-    end
-
-    function Mini:Toggle()
-        Mini:SetVisible(not Mini.Visible)
-    end
-
-    function Mini:SetCollapsed(State)
-        Mini.Collapsed = State == true
-        Body.Visible = not Mini.Collapsed
-        if Arrow then
-            game:GetService("TweenService"):Create(Arrow, Library.TweenInfo, { Rotation = Mini.Collapsed and -90 or 0 }):Play()
-        end
-    end
-
-    function Mini:SetPosition(Position)
-        Holder.Position = Position
-    end
-
-    function Mini:Clear()
-        for _, Row in table.clone(Mini.Rows) do
-            Row:Destroy()
-        end
-    end
-
-    function Mini:Destroy()
-        if Mini.Destroyed then
-            return
-        end
-        Mini.Destroyed = true
-
-        Mini:Clear()
-        for _, Connection in Mini.Connections do
-            pcall(function()
-                Connection:Disconnect()
-            end)
-        end
-
-        local At = table.find(Library.DraggableElements, Holder)
-        if At then
-            table.remove(Library.DraggableElements, At)
-        end
-        Holder:Destroy()
-    end
-
-    return Mini
 end
 
 function Library:CreateWindow(WindowInfo)
@@ -18095,17 +17692,20 @@ function Library:CreateWindow(WindowInfo)
         if Info.Icon then
             local ParsedIcon = Library:GetCustomIcon(Info.Icon)
             if ParsedIcon then
-                local _IconImg = New("ImageLabel", {
+                local IconImg = New("ImageLabel", {
                     BackgroundTransparency = 1,
                     Size = UDim2.fromOffset(16, 16),
                     Image = ParsedIcon.Url,
-                    ImageColor3 = Info.TitleColor or "FontColor",
+                    ImageColor3 = "FontColor",
                     ImageRectOffset = ParsedIcon.ImageRectOffset,
                     ImageRectSize = ParsedIcon.ImageRectSize,
                     LayoutOrder = 1,
                     ZIndex = 9002,
                     Parent = TitleRow,
                 })
+                if Info.TitleColor then
+                    IconImg.ImageColor3 = Info.TitleColor
+                end
             end
         end
 
@@ -18115,12 +17715,14 @@ function Library:CreateWindow(WindowInfo)
             AutomaticSize = Enum.AutomaticSize.Y,
             Text = Info.Title,
             TextSize = 18,
-            TextColor3 = Info.TitleColor or "FontColor",
             TextXAlignment = Enum.TextXAlignment.Left,
             LayoutOrder = 2,
             ZIndex = 9002,
             Parent = TitleRow,
         })
+        if Info.TitleColor then
+            TitleLabel.TextColor3 = Info.TitleColor
+        end
 
         local DescriptionLabel = New("TextLabel", {
             BackgroundTransparency = 1,
@@ -18130,12 +17732,14 @@ function Library:CreateWindow(WindowInfo)
             TextSize = 14,
             TextTransparency = Info.DescriptionColor and 0 or 0.2,
             TextXAlignment = Enum.TextXAlignment.Left,
-            TextColor3 = Info.DescriptionColor or "FontColor",
             TextWrapped = true,
             LayoutOrder = 2,
             ZIndex = 9002,
             Parent = HeaderContainer,
         })
+        if Info.DescriptionColor then
+            DescriptionLabel.TextColor3 = Info.DescriptionColor
+        end
 
         DialogContainer = New("Frame", {
             BackgroundTransparency = 1,
@@ -19555,8 +19159,6 @@ function Library:CreateLoading(LoadingInfo)
 
     function Loading:SetLoadingIcon(Icon)
         local IconData = Library:GetCustomIcon(Icon)
-        assert(IconData, "Image must be a valid Roblox asset or a valid URL or a valid lucide icon.")
-
         LoadingIcon.Image = IconData.Url
         LoadingIcon.ImageRectOffset = IconData.ImageRectOffset
         LoadingIcon.ImageRectSize = IconData.ImageRectSize
