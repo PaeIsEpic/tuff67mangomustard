@@ -5095,7 +5095,7 @@ do
                 KeyPicker.Toggled = not KeyPicker.Toggled
                 KeyPicker:DoClick()
                 KeyPicker:Update()
-            end)
+            end))
 
             KeybindsToggle.Holder = Holder
             KeybindsToggle.Label = Label
