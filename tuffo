@@ -1597,9 +1597,13 @@ type IconModule = {
 }
 
 local FetchIcons, Icons = pcall(function()
-    return (loadstring(
-        game:HttpGet("https://gitlab.com/upio/lucide-roblox-direct/-/raw/main/source.lua")
-    ) :: () -> IconModule)()
+    local module = (loadstring(
+        game:HttpGet("https://raw.githubusercontent.com/notpoiu/Molto/refs/heads/main/source.lua")
+    ) :: () -> any)()
+    if module and module.SetProvider then
+        pcall(module.SetProvider, "lucide")
+    end
+    return module
 end)
 
 function Library:GetIcon(IconName: string)
