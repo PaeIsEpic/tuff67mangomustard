@@ -12463,6 +12463,289 @@ function Library:AddThemeSelector(Groupbox)
     return Dropdown
 end
 
+--// Kitty themes: colours + decorations (ears, border, stickers, a moving figure) \\--
+--// Use: Library:AddKittyThemes(Groupbox) -> creates Options.ThemeDropdown + Toggles.ThemeToggle
+do
+local KittyThemeOrder = { "Cute", "Christmas", "Halloween", "Thanksgiving", "Valentine" }
+local KittyThemes = {
+    Cute = {
+        Colors = { Background={30,22,34}, Main={44,32,50}, Accent={255,140,200}, Outline={120,70,120}, Font={255,235,248},
+            Base={{0,90,40,85},{0.5,45,28,55},{1,30,22,34}}, Shine={Speed=0.35,Rot=18,Colors={{0,255,140,200},{0.5,200,160,255},{1,255,140,200}}} },
+        EarOuter = {28,24,34}, EarInner = {255,170,210}, EarItem = "🎀",
+        Border = {{0,255,140,200},{0.5,200,160,255},{1,255,140,200}},
+        Corners = { "💗", "🐾" },
+        Walker = "🐈", Mode = "walk",
+    },
+    Christmas = {
+        Colors = { Background={14,32,22}, Main={22,46,32}, Accent={220,40,50}, Outline={60,110,70}, Font={245,250,245},
+            Base={{0,20,70,40},{0.5,14,40,26},{1,8,20,12}}, Shine={Speed=0.4,Rot=20,Colors={{0,220,40,50},{0.5,255,215,90},{1,40,170,80}}} },
+        EarOuter = {200,30,40}, EarInner = {250,250,250}, EarItem = "🔔",
+        Border = {{0,220,40,50},{0.33,250,250,250},{0.66,40,170,80},{1,220,40,50}},
+        Corners = { "🎁", "❄️" },
+        Walker = "🦌", Mode = "walk", Lights = true,
+    },
+    Halloween = {
+        Colors = { Background={18,12,22}, Main={30,20,34}, Accent={255,130,20}, Outline={90,50,110}, Font={255,236,215},
+            Base={{0,60,25,80},{0.5,30,15,35},{1,10,5,12}}, Shine={Speed=0.45,Rot=24,Colors={{0,255,130,20},{0.5,140,60,200},{1,255,130,20}}} },
+        EarOuter = {20,16,24}, EarInner = {255,130,20}, EarItem = "🕸️",
+        Border = {{0,255,130,20},{0.5,140,60,200},{1,255,130,20}},
+        Corners = { "🎃", "👻" },
+        Walker = "🦇", Mode = "fly",
+    },
+    Thanksgiving = {
+        Colors = { Background={34,22,14}, Main={48,32,20}, Accent={230,140,50}, Outline={120,75,40}, Font={255,240,220},
+            Base={{0,90,45,15},{0.5,50,30,16},{1,22,14,8}}, Shine={Speed=0.35,Rot=16,Colors={{0,230,140,50},{0.5,190,60,30},{1,230,140,50}}} },
+        EarOuter = {110,65,35}, EarInner = {240,190,130}, EarItem = "🍁",
+        Border = {{0,230,140,50},{0.5,190,60,30},{1,230,140,50}},
+        Corners = { "🥧", "🌽" },
+        Walker = "🦃", Mode = "walk",
+    },
+    Valentine = {
+        Colors = { Background={40,12,24}, Main={58,20,36}, Accent={255,80,130}, Outline={150,50,90}, Font={255,232,240},
+            Base={{0,130,30,70},{0.5,70,18,40},{1,30,8,18}}, Shine={Speed=0.4,Rot=20,Colors={{0,255,80,130},{0.5,255,220,235},{1,255,80,130}}} },
+        EarOuter = {255,120,170}, EarInner = {220,40,90}, EarItem = "💝",
+        Border = {{0,255,80,130},{0.5,255,220,235},{1,255,80,130}},
+        Corners = { "💌", "🌹" },
+        Walker = "💕", Mode = "float",
+    },
+}
+--// Colours go into the normal theme table (not ThemeOrder, so the regular selector stays as it was)
+for Name, Def in KittyThemes do
+    Library.Themes["Kitty " .. Name] = Def.Colors
+end
+
+local function KittyRGB(T)
+    return Color3.fromRGB(T[1], T[2], T[3])
+end
+
+local function KittyEmoji(Parent, Text, Size, ZIndex)
+    local Label = Instance.new("TextLabel")
+    Label.BackgroundTransparency = 1
+    Label.BorderSizePixel = 0
+    Label.AnchorPoint = Vector2.new(0.5, 0.5)
+    Label.Size = UDim2.fromOffset(Size + 8, Size + 8)
+    Label.Text = Text
+    Label.TextSize = Size
+    Label.TextColor3 = Color3.new(1, 1, 1)
+    Label.ZIndex = ZIndex or 5
+    Label.Parent = Parent
+    return Label
+end
+
+--// A pointy ear: a rounded square turned 45 degrees, clipped by a CanvasGroup so only the top triangle shows
+local function KittyEar(Root, Def, Left)
+    local Ear = Instance.new("CanvasGroup")
+    Ear.BackgroundTransparency = 1
+    Ear.BorderSizePixel = 0
+    Ear.AnchorPoint = Vector2.new(Left and 0 or 1, 1)
+    Ear.Size = UDim2.fromOffset(40, 20)
+    Ear.Position = Left and UDim2.new(0, 16, 0, 2) or UDim2.new(1, -16, 0, 2)
+    Ear.ZIndex = 2
+    Ear.Parent = Root
+
+    local Tilt = Left and -6 or 6
+    local function Triangle(Size, Color, YOffset, ZIndex)
+        local Square = Instance.new("Frame")
+        Square.AnchorPoint = Vector2.new(0.5, 0.5)
+        Square.Size = UDim2.fromOffset(Size, Size)
+        Square.Position = UDim2.new(0.5, 0, 1, YOffset)
+        Square.Rotation = 45 + Tilt
+        Square.BackgroundColor3 = Color
+        Square.BorderSizePixel = 0
+        Square.ZIndex = ZIndex
+        Square.Parent = Ear
+        local Corner = Instance.new("UICorner")
+        Corner.CornerRadius = UDim.new(0, 5)
+        Corner.Parent = Square
+    end
+    Triangle(26, KittyRGB(Def.EarOuter), 0, 1)
+    Triangle(14, KittyRGB(Def.EarInner), 3, 2)
+    return Ear
+end
+
+local function BuildKittyDecor(Def)
+    local MainFrame = Library.MainFrame
+    if not MainFrame then
+        return nil
+    end
+
+    local Root = Instance.new("Frame")
+    Root.Name = "KittyDecor"
+    Root.BackgroundTransparency = 1
+    Root.BorderSizePixel = 0
+    Root.Size = UDim2.fromScale(1, 1)
+    Root.ZIndex = 1500 --// above the window content, but it never takes clicks
+    Root.Parent = MainFrame
+
+    --// Glowing border with a slowly turning gradient
+    local Border = Instance.new("Frame")
+    Border.BackgroundTransparency = 1
+    Border.BorderSizePixel = 0
+    Border.Size = UDim2.fromScale(1, 1)
+    Border.ZIndex = 1
+    Border.Parent = Root
+    local BorderCorner = Instance.new("UICorner")
+    BorderCorner.CornerRadius = UDim.new(0, Library.CornerRadius)
+    BorderCorner.Parent = Border
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Thickness = 2
+    Stroke.Color = Color3.new(1, 1, 1)
+    Stroke.Parent = Border
+    local Gradient = Instance.new("UIGradient")
+    Gradient.Color = ThemeSequence(Def.Border)
+    Gradient.Parent = Stroke
+
+    --// Ears + the little item on the left ear
+    local LeftEar = KittyEar(Root, Def, true)
+    local RightEar = KittyEar(Root, Def, false)
+    local EarItem = KittyEmoji(Root, Def.EarItem, 18, 4)
+    EarItem.Position = UDim2.new(0, 54, 0, -6)
+    EarItem.Rotation = -18
+
+    --// Stickers on the bottom corners
+    local BottomLeft = KittyEmoji(Root, Def.Corners[1], 18, 4)
+    BottomLeft.Position = UDim2.new(0, 4, 1, -4)
+    BottomLeft.Rotation = -14
+    local BottomRight = KittyEmoji(Root, Def.Corners[2], 18, 4)
+    BottomRight.Position = UDim2.new(1, -4, 1, -4)
+    BottomRight.Rotation = 14
+
+    --// Christmas lights along the top edge
+    local Lights = {}
+    local LightColors = { Color3.fromRGB(255, 70, 70), Color3.fromRGB(255, 215, 90), Color3.fromRGB(80, 220, 110), Color3.fromRGB(110, 170, 255) }
+    if Def.Lights then
+        local Count = 12
+        for Index = 1, Count do
+            local Bulb = Instance.new("Frame")
+            Bulb.AnchorPoint = Vector2.new(0.5, 0.5)
+            Bulb.Size = UDim2.fromOffset(6, 6)
+            Bulb.Position = UDim2.new(0.16 + 0.68 * (Index - 1) / (Count - 1), 0, 0, 0)
+            Bulb.BorderSizePixel = 0
+            Bulb.ZIndex = 3
+            Bulb.Parent = Root
+            local Round = Instance.new("UICorner")
+            Round.CornerRadius = UDim.new(0.5, 0)
+            Round.Parent = Bulb
+            table.insert(Lights, Bulb)
+        end
+    end
+
+    --// The moving figure
+    local Walker = KittyEmoji(Root, Def.Walker, 22, 6)
+
+    local Start = os.clock()
+    local Connection
+    Connection = RunService.Heartbeat:Connect(function()
+        if not Root.Parent then
+            Connection:Disconnect()
+            return
+        end
+        local T = os.clock() - Start
+
+        Gradient.Rotation = (T * 40) % 360
+
+        if Def.Mode == "walk" then
+            --// strolls back and forth on top of the window with a little hop
+            local Hop = math.abs(math.sin(T * 7))
+            Walker.Position = UDim2.new(0.5 + 0.3 * math.sin(T * 0.35), 0, 0, -12 - Hop * 3)
+            Walker.Rotation = math.sin(T * 7) * 6
+        elseif Def.Mode == "fly" then
+            --// flutters along above the window
+            Walker.Position = UDim2.new(0.5 + 0.3 * math.sin(T * 0.5), 0, 0, -28 + math.sin(T * 3) * 5)
+            Walker.Rotation = math.sin(T * 6) * 10
+        elseif Def.Mode == "float" then
+            --// drifts up the right side and fades in/out
+            local P = (T * 0.18) % 1
+            Walker.Position = UDim2.new(1, 16, 0.92 - 0.84 * P, 0)
+            Walker.Rotation = math.sin(T * 3) * 12
+            if P < 0.1 then
+                Walker.TextTransparency = 1 - P / 0.1
+            elseif P > 0.8 then
+                Walker.TextTransparency = (P - 0.8) / 0.2
+            else
+                Walker.TextTransparency = 0
+            end
+        end
+
+        --// one ear twitches every few seconds, taking turns
+        local Cycle = T % 4.5
+        local Twitch = Cycle < 0.16 and math.sin(Cycle / 0.16 * math.pi) * 10 or 0
+        if math.floor(T / 4.5) % 2 == 0 then
+            LeftEar.Rotation = -Twitch
+            RightEar.Rotation = 0
+        else
+            LeftEar.Rotation = 0
+            RightEar.Rotation = Twitch
+        end
+
+        if #Lights > 0 then
+            local Step = math.floor(T / 0.45)
+            for Index, Bulb in Lights do
+                Bulb.BackgroundColor3 = LightColors[(Index + Step) % #LightColors + 1]
+            end
+        end
+    end)
+
+    return { Root = Root, Connection = Connection }
+end
+
+function Library:AddKittyThemes(Groupbox)
+    local ActiveDecor = nil
+    local Enabled = false
+    local PreviousTheme = nil
+
+    local function ClearDecor()
+        if ActiveDecor then
+            if ActiveDecor.Connection then
+                ActiveDecor.Connection:Disconnect()
+            end
+            ActiveDecor.Root:Destroy()
+            ActiveDecor = nil
+        end
+    end
+
+    local function ApplyChosen()
+        local Name = Options.ThemeDropdown and Options.ThemeDropdown.Value or "Cute"
+        local Def = KittyThemes[Name] or KittyThemes.Cute
+        ClearDecor()
+        Library:SetTheme("Kitty " .. (KittyThemes[Name] and Name or "Cute"))
+        ActiveDecor = BuildKittyDecor(Def)
+    end
+
+    local Dropdown = Groupbox:AddDropdown("ThemeDropdown", {
+        Text = "Kitty Theme",
+        Values = table.clone(KittyThemeOrder),
+        Default = "Cute",
+        Callback = function()
+            if Enabled then
+                ApplyChosen()
+            end
+        end,
+    })
+
+    Groupbox:AddToggle("ThemeToggle", {
+        Text = "Enable Kitty Theme",
+        Default = false,
+        Callback = function(Value)
+            if Value and not Enabled then
+                local Current = Library.CurrentTheme
+                PreviousTheme = (Current and not tostring(Current):find("^Kitty ")) and Current or "Normal"
+                Enabled = true
+                ApplyChosen()
+            elseif not Value and Enabled then
+                Enabled = false
+                ClearDecor()
+                Library:SetTheme(PreviousTheme or "Normal")
+            end
+        end,
+    })
+
+    Library:OnUnload(ClearDecor)
+
+    return Dropdown
+end
+end --// Kitty themes
+
 --// Sidebar toggle for UI Settings (saved by SaveManager like any toggle) \\--
 function Library:AddSidebarToggle(Groupbox)
     local Window = Library.Window
