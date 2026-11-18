@@ -12467,46 +12467,299 @@ end
 --// Use: Library:AddKittyThemes(Groupbox) -> creates Options.ThemeDropdown + Toggles.ThemeToggle
 do
 local KittyThemeOrder = { "Cute", "Christmas", "Halloween", "Thanksgiving", "Valentine" }
+
+--// 8-bit sprites: one letter = one pixel, "." = empty. Colours come from each theme's palette.
+local SpriteRows = {
+    KittyA = {
+        "K.........K...K.",
+        "K.........KK.KK.",
+        ".K........KKKKK.",
+        ".K........KWKWK.",
+        "..KKKKKKKKKKKKP.",
+        "..KKKKKKKKPPKK..",
+        "..KKKKKKKKKKK...",
+        "..KKKKKKKKKKK...",
+        "..K.K.....K.K...",
+        "..K.K.....K.K...",
+    },
+    KittyB = {
+        "K.........K...K.",
+        "K.........KK.KK.",
+        ".K........KKKKK.",
+        ".K........KWKWK.",
+        "..KKKKKKKKKKKKP.",
+        "..KKKKKKKKPPKK..",
+        "..KKKKKKKKKKK...",
+        "..KKKKKKKKKKK...",
+        "...K.K...K.K....",
+        "..K...K.K...K...",
+    },
+    PenguinA = {
+        "......RW..",
+        "...RRRR...",
+        "..WWWWWW..",
+        "..KKKKKK..",
+        ".KKWWWWKK.",
+        ".KWKWWKWK.",
+        ".KWWOOWWK.",
+        "KKWWWWWWKK",
+        "KKWWWWWWKK",
+        ".KWWWWWWK.",
+        "..KWWWWK..",
+        "..OO..OO..",
+    },
+    PenguinB = {
+        "......RW..",
+        "...RRRR...",
+        "..WWWWWW..",
+        "..KKKKKK..",
+        ".KKWWWWKK.",
+        ".KWKWWKWK.",
+        ".KWWOOWWK.",
+        "KKWWWWWWKK",
+        "KKWWWWWWKK",
+        ".KWWWWWWK.",
+        "..KWWWWK..",
+        "...OOOO...",
+    },
+    Snowman = {
+        "...KKK...",
+        "...KKK...",
+        "..KKKKK..",
+        "...WWW...",
+        "..WKWKW..",
+        "..WWWOO..",
+        "..RRRRR..",
+        ".WWWWRWW.",
+        "WWWWKWWWW",
+        "WWWWWWWWW",
+        "WWWWKWWWW",
+        ".WWWWWWW.",
+    },
+    Gift = {
+        "..Y..Y..",
+        "...YY...",
+        "RRRYYRRR",
+        "RRRYYRRR",
+        "YYYYYYYY",
+        "RRRYYRRR",
+        "RRRYYRRR",
+        "RRRYYRRR",
+    },
+    BatA = {
+        "K...K.K...K",
+        "KK..KKK..KK",
+        "KKKKRKRKKKK",
+        ".KKKKKKKKK.",
+        "....KKK....",
+        "...........",
+    },
+    BatB = {
+        "....K.K....",
+        "....KKK....",
+        "..KKRKRKK..",
+        ".KKKKKKKKK.",
+        "KK..KKK..KK",
+        "K.........K",
+    },
+    Pumpkin = {
+        "....GG....",
+        ".....G....",
+        ".OOOOOOOO.",
+        "OOYOOOOYOO",
+        "OYYYOOYYYO",
+        "OOOOOOOOOO",
+        "OYYYYYYYYO",
+        "OOYOYOYOOO",
+        ".OOOOOOOO.",
+    },
+    GhostA = {
+        "...WWWW...",
+        "..WWWWWW..",
+        ".WWWWWWWW.",
+        ".WWKWWKWW.",
+        ".WWKWWKWW.",
+        ".WPWWWWPW.",
+        ".WWWWWWWW.",
+        ".WWWWWWWW.",
+        ".WWWWWWWW.",
+        ".WW.WW.WW.",
+    },
+    GhostB = {
+        "...WWWW...",
+        "..WWWWWW..",
+        ".WWWWWWWW.",
+        ".WWKWWKWW.",
+        ".WWKWWKWW.",
+        ".WPWWWWPW.",
+        ".WWWWWWWW.",
+        ".WWWWWWWW.",
+        ".WWWWWWWW.",
+        ".W.WW.WWW.",
+    },
+    TurkeyA = {
+        ".ROYR.......",
+        "RROYYR..BB..",
+        "ROOYYRR.BKBO",
+        "ROYYBBBBBBR.",
+        "ROYBBBBBBBR.",
+        ".RYBBBBBBB..",
+        "..BBBBBBBB..",
+        "...BBBBBB...",
+        "....BBBB....",
+        "....O..O....",
+        "...OO.OO....",
+    },
+    TurkeyB = {
+        ".ROYR.......",
+        "RROYYR..BB..",
+        "ROOYYRR.BKBO",
+        "ROYYBBBBBBR.",
+        "ROYBBBBBBBR.",
+        ".RYBBBBBBB..",
+        "..BBBBBBBB..",
+        "...BBBBBB...",
+        "....BBBB....",
+        ".....OO.....",
+        "....OO.OO...",
+    },
+    Pie = {
+        "....WW....",
+        "...WWWW...",
+        ".CCCCCCCC.",
+        "CDCDCDCDCD",
+        "FFFFFFFFFF",
+        ".CCCCCCCC.",
+    },
+    Leaf = {
+        "...O...",
+        ".O.O.O.",
+        ".OOOOO.",
+        "OOOROOO",
+        ".OOROO.",
+        "..ORO..",
+        "...B...",
+    },
+    Heart = {
+        ".RR.RR.",
+        "RWRRRRR",
+        "RRRRRRR",
+        ".RRRRR.",
+        "..RRR..",
+        "...R...",
+    },
+    Letter = {
+        "PPPPPPPPPP",
+        "PPWWWWWWPP",
+        "PWPWWWWPWP",
+        "PWWPRRPWWP",
+        "PWWWRRWWWP",
+        "PWWWWWWWWP",
+        "PPPPPPPPPP",
+    },
+    Paw = {
+        "..P.P..",
+        "P.....P",
+        "..PPP..",
+        ".PPPPP.",
+        ".PPPPP.",
+        "..PPP..",
+    },
+    Bow = {
+        "PP.....PP",
+        "PWPP.PPWP",
+        "PPPPDPPPP",
+        "PPPP.PPPP",
+        "PP.D.D.PP",
+        "...D.D...",
+    },
+    Holly = {
+        "GG...GG",
+        "GGGRGGG",
+        ".GRRRG.",
+        "..GRG..",
+    },
+    WitchHat = {
+        ".....K...",
+        "....KK...",
+        "....KKK..",
+        "...KKKK..",
+        "...OOOO..",
+        "KKKKKKKKK",
+    },
+    Sparkle = {
+        ".W.",
+        "WWW",
+        ".W.",
+    },
+}
+
 local KittyThemes = {
     Cute = {
         Colors = { Background={30,22,34}, Main={44,32,50}, Accent={255,140,200}, Outline={120,70,120}, Font={255,235,248},
             Base={{0,90,40,85},{0.5,45,28,55},{1,30,22,34}}, Shine={Speed=0.35,Rot=18,Colors={{0,255,140,200},{0.5,200,160,255},{1,255,140,200}}} },
-        EarOuter = {28,24,34}, EarInner = {255,170,210}, EarItem = "🎀",
+        EarOuter = {28,24,34}, EarInner = {255,170,210},
         Border = {{0,255,140,200},{0.5,200,160,255},{1,255,140,200}},
-        Corners = { "💗", "🐾" },
-        Walker = "🐈", Mode = "walk",
+        EarItem = { Sprite = "Bow", Palette = { P={255,140,200}, W={255,230,245}, D={200,70,140} } },
+        Corners = {
+            { Sprite = "Heart", Palette = { R={255,120,190}, W={255,230,245} } },
+            { Sprite = "Paw", Palette = { P={255,170,215} } },
+        },
+        Walker = { Frames = {"KittyA","KittyB"}, Palette = { K={28,24,34}, W={255,255,255}, P={255,140,200} }, Mode = "walk", Mirror = true },
+        Particles = { Kind = "sparkle", Count = 6, Color = {255,205,235} },
     },
     Christmas = {
         Colors = { Background={14,32,22}, Main={22,46,32}, Accent={220,40,50}, Outline={60,110,70}, Font={245,250,245},
             Base={{0,20,70,40},{0.5,14,40,26},{1,8,20,12}}, Shine={Speed=0.4,Rot=20,Colors={{0,220,40,50},{0.5,255,215,90},{1,40,170,80}}} },
-        EarOuter = {200,30,40}, EarInner = {250,250,250}, EarItem = "🔔",
+        EarOuter = {200,30,40}, EarInner = {250,250,250},
         Border = {{0,220,40,50},{0.33,250,250,250},{0.66,40,170,80},{1,220,40,50}},
-        Corners = { "🎁", "❄️" },
-        Walker = "🦌", Mode = "walk", Lights = true,
+        EarItem = { Sprite = "Holly", Palette = { G={40,150,70}, R={230,40,50} } },
+        Corners = {
+            { Sprite = "Snowman", Palette = { K={30,30,36}, W={245,248,255}, O={255,140,40}, R={220,40,50} } },
+            { Sprite = "Gift", Palette = { R={220,40,50}, Y={255,215,90} } },
+        },
+        Walker = { Frames = {"PenguinA","PenguinB"}, Palette = { K={30,34,48}, W={245,248,255}, O={255,150,40}, R={220,40,50} }, Mode = "walk", Mirror = true },
+        Lights = true,
+        Particles = { Kind = "snow", Count = 12, Color = {245,248,255} },
     },
     Halloween = {
         Colors = { Background={18,12,22}, Main={30,20,34}, Accent={255,130,20}, Outline={90,50,110}, Font={255,236,215},
             Base={{0,60,25,80},{0.5,30,15,35},{1,10,5,12}}, Shine={Speed=0.45,Rot=24,Colors={{0,255,130,20},{0.5,140,60,200},{1,255,130,20}}} },
-        EarOuter = {20,16,24}, EarInner = {255,130,20}, EarItem = "🕸️",
+        EarOuter = {20,16,24}, EarInner = {255,130,20},
         Border = {{0,255,130,20},{0.5,140,60,200},{1,255,130,20}},
-        Corners = { "🎃", "👻" },
-        Walker = "🦇", Mode = "fly",
+        EarItem = { Sprite = "WitchHat", Palette = { K={45,25,60}, O={255,130,20} } },
+        Corners = {
+            { Sprite = "Pumpkin", Palette = { O={255,130,20}, Y={255,225,90}, G={60,150,60} } },
+            { Frames = {"GhostA","GhostB"}, Palette = { W={240,240,255}, K={30,20,40}, P={255,160,200} }, Bob = true },
+        },
+        Walker = { Frames = {"BatA","BatB"}, Palette = { K={50,25,65}, R={255,60,60} }, Mode = "fly" },
+        Particles = { Kind = "sparkle", Count = 4, Color = {190,120,255} },
     },
     Thanksgiving = {
         Colors = { Background={34,22,14}, Main={48,32,20}, Accent={230,140,50}, Outline={120,75,40}, Font={255,240,220},
             Base={{0,90,45,15},{0.5,50,30,16},{1,22,14,8}}, Shine={Speed=0.35,Rot=16,Colors={{0,230,140,50},{0.5,190,60,30},{1,230,140,50}}} },
-        EarOuter = {110,65,35}, EarInner = {240,190,130}, EarItem = "🍁",
+        EarOuter = {110,65,35}, EarInner = {240,190,130},
         Border = {{0,230,140,50},{0.5,190,60,30},{1,230,140,50}},
-        Corners = { "🥧", "🌽" },
-        Walker = "🦃", Mode = "walk",
+        EarItem = { Sprite = "Leaf", Palette = { O={240,130,40}, R={190,60,30}, B={110,65,35} } },
+        Corners = {
+            { Sprite = "Pie", Palette = { W={255,250,240}, C={215,155,85}, D={170,110,50}, F={200,100,40} } },
+            { Sprite = "Leaf", Palette = { O={220,70,40}, R={150,40,20}, B={110,65,35} } },
+        },
+        Walker = { Frames = {"TurkeyA","TurkeyB"}, Palette = { R={200,50,40}, O={240,140,40}, Y={250,200,80}, B={120,70,35}, K={20,15,10} }, Mode = "walk", Mirror = true },
+        Particles = { Kind = "leaf", Count = 4, Palette = { O={240,130,40}, R={190,60,30}, B={110,65,35} } },
     },
     Valentine = {
         Colors = { Background={40,12,24}, Main={58,20,36}, Accent={255,80,130}, Outline={150,50,90}, Font={255,232,240},
             Base={{0,130,30,70},{0.5,70,18,40},{1,30,8,18}}, Shine={Speed=0.4,Rot=20,Colors={{0,255,80,130},{0.5,255,220,235},{1,255,80,130}}} },
-        EarOuter = {255,120,170}, EarInner = {220,40,90}, EarItem = "💝",
+        EarOuter = {255,120,170}, EarInner = {220,40,90},
         Border = {{0,255,80,130},{0.5,255,220,235},{1,255,80,130}},
-        Corners = { "💌", "🌹" },
-        Walker = "💕", Mode = "float",
+        EarItem = { Sprite = "Heart", Palette = { R={230,40,90}, W={255,200,220} } },
+        Corners = {
+            { Sprite = "Letter", Palette = { P={255,120,170}, W={255,245,248}, R={220,30,70} } },
+            { Sprite = "Heart", Palette = { R={230,40,90}, W={255,200,220} } },
+        },
+        Walker = { Frames = {"KittyA","KittyB"}, Palette = { K={250,236,242}, W={60,20,40}, P={230,40,90} }, Mode = "walk", Mirror = true },
+        Particles = { Kind = "heart", Count = 5, Palette = { R={255,90,140}, W={255,210,225} } },
     },
 }
 --// Colours go into the normal theme table (not ThemeOrder, so the regular selector stays as it was)
@@ -12514,22 +12767,77 @@ for Name, Def in KittyThemes do
     Library.Themes["Kitty " .. Name] = Def.Colors
 end
 
+local PIXEL = 2 --// on-screen size of one sprite pixel
+
 local function KittyRGB(T)
     return Color3.fromRGB(T[1], T[2], T[3])
 end
 
-local function KittyEmoji(Parent, Text, Size, ZIndex)
-    local Label = Instance.new("TextLabel")
-    Label.BackgroundTransparency = 1
-    Label.BorderSizePixel = 0
-    Label.AnchorPoint = Vector2.new(0.5, 0.5)
-    Label.Size = UDim2.fromOffset(Size + 8, Size + 8)
-    Label.Text = Text
-    Label.TextSize = Size
-    Label.TextColor3 = Color3.new(1, 1, 1)
-    Label.ZIndex = ZIndex or 5
-    Label.Parent = Parent
-    return Label
+--// Draws a sprite; pixels of the same colour next to each other share one Frame to keep it light
+local function BuildSprite(Parent, Rows, Palette, Px, Mirror, ZIndex)
+    local Box = Instance.new("Frame")
+    Box.BackgroundTransparency = 1
+    Box.BorderSizePixel = 0
+    Box.Size = UDim2.fromOffset(#Rows[1] * Px, #Rows * Px)
+    Box.ZIndex = ZIndex or 5
+    Box.Parent = Parent
+
+    for Y, Row in ipairs(Rows) do
+        if Mirror then
+            Row = Row:reverse()
+        end
+        local X = 1
+        while X <= #Row do
+            local Char = Row:sub(X, X)
+            local Run = 1
+            while X + Run <= #Row and Row:sub(X + Run, X + Run) == Char do
+                Run += 1
+            end
+            if Char ~= "." and Palette[Char] then
+                local Pixel = Instance.new("Frame")
+                Pixel.BorderSizePixel = 0
+                Pixel.BackgroundColor3 = KittyRGB(Palette[Char])
+                Pixel.Position = UDim2.fromOffset((X - 1) * Px, (Y - 1) * Px)
+                Pixel.Size = UDim2.fromOffset(Run * Px, Px)
+                Pixel.ZIndex = Box.ZIndex
+                Pixel.Parent = Box
+            end
+            X += Run
+        end
+    end
+    return Box
+end
+
+--// A sprite with animation frames (and optional mirrored copies for walking left)
+local function BuildAnimated(Parent, FrameKeys, Palette, Px, WithMirror, ZIndex)
+    local First = SpriteRows[FrameKeys[1]]
+    local Holder = Instance.new("Frame")
+    Holder.BackgroundTransparency = 1
+    Holder.BorderSizePixel = 0
+    Holder.Size = UDim2.fromOffset(#First[1] * Px, #First * Px)
+    Holder.ZIndex = ZIndex or 5
+    Holder.Parent = Parent
+
+    local Right, Left = {}, {}
+    for Index, Key in ipairs(FrameKeys) do
+        Right[Index] = BuildSprite(Holder, SpriteRows[Key], Palette, Px, false, Holder.ZIndex)
+        Right[Index].Visible = Index == 1
+        if WithMirror then
+            Left[Index] = BuildSprite(Holder, SpriteRows[Key], Palette, Px, true, Holder.ZIndex)
+            Left[Index].Visible = false
+        end
+    end
+
+    local Current = Right[1]
+    local function Show(Index, FacingLeft)
+        local Frame = (FacingLeft and WithMirror) and Left[Index] or Right[Index]
+        if Frame and Frame ~= Current then
+            Current.Visible = false
+            Frame.Visible = true
+            Current = Frame
+        end
+    end
+    return Holder, Show, #FrameKeys
 end
 
 --// A pointy ear: a rounded square turned 45 degrees, clipped by a CanvasGroup so only the top triangle shows
@@ -12595,20 +12903,32 @@ local function BuildKittyDecor(Def)
     Gradient.Color = ThemeSequence(Def.Border)
     Gradient.Parent = Stroke
 
-    --// Ears + the little item on the left ear
+    --// Ears + the little pixel item on the left ear
     local LeftEar = KittyEar(Root, Def, true)
     local RightEar = KittyEar(Root, Def, false)
-    local EarItem = KittyEmoji(Root, Def.EarItem, 18, 4)
-    EarItem.Position = UDim2.new(0, 54, 0, -6)
-    EarItem.Rotation = -18
+    local EarItem = BuildSprite(Root, SpriteRows[Def.EarItem.Sprite], Def.EarItem.Palette, PIXEL, false, 4)
+    EarItem.AnchorPoint = Vector2.new(0.5, 0.5)
+    EarItem.Position = UDim2.new(0, 56, 0, -5)
 
-    --// Stickers on the bottom corners
-    local BottomLeft = KittyEmoji(Root, Def.Corners[1], 18, 4)
-    BottomLeft.Position = UDim2.new(0, 4, 1, -4)
-    BottomLeft.Rotation = -14
-    local BottomRight = KittyEmoji(Root, Def.Corners[2], 18, 4)
-    BottomRight.Position = UDim2.new(1, -4, 1, -4)
-    BottomRight.Rotation = 14
+    --// Pixel stickers on the bottom corners (hanging a little outside the window)
+    local Bobbers = {}
+    local Animators = {}
+    for Index, Corner in ipairs(Def.Corners) do
+        local Sticker, Show
+        if Corner.Frames then
+            Sticker, Show = BuildAnimated(Root, Corner.Frames, Corner.Palette, PIXEL, false, 4)
+            table.insert(Animators, Show)
+        else
+            Sticker = BuildSprite(Root, SpriteRows[Corner.Sprite], Corner.Palette, PIXEL, false, 4)
+        end
+        local IsLeft = Index == 1
+        Sticker.AnchorPoint = Vector2.new(IsLeft and 0 or 1, 1)
+        local Base = IsLeft and UDim2.new(0, -6, 1, 6) or UDim2.new(1, 6, 1, 6)
+        Sticker.Position = Base
+        if Corner.Bob then
+            table.insert(Bobbers, { Sticker, Base })
+        end
+    end
 
     --// Christmas lights along the top edge
     local Lights = {}
@@ -12618,20 +12938,53 @@ local function BuildKittyDecor(Def)
         for Index = 1, Count do
             local Bulb = Instance.new("Frame")
             Bulb.AnchorPoint = Vector2.new(0.5, 0.5)
-            Bulb.Size = UDim2.fromOffset(6, 6)
-            Bulb.Position = UDim2.new(0.16 + 0.68 * (Index - 1) / (Count - 1), 0, 0, 0)
+            Bulb.Size = UDim2.fromOffset(4, 4)
+            Bulb.Position = UDim2.new(0.16 + 0.68 * (Index - 1) / (Count - 1), 0, 0, 1)
             Bulb.BorderSizePixel = 0
             Bulb.ZIndex = 3
             Bulb.Parent = Root
-            local Round = Instance.new("UICorner")
-            Round.CornerRadius = UDim.new(0.5, 0)
-            Round.Parent = Bulb
             table.insert(Lights, Bulb)
         end
     end
 
-    --// The moving figure
-    local Walker = KittyEmoji(Root, Def.Walker, 22, 6)
+    --// Gentle particles (snow / sparkles / leaves / hearts)
+    local Particles = {}
+    local Spec = Def.Particles
+    if Spec then
+        for _ = 1, Spec.Count do
+            local Obj
+            if Spec.Kind == "snow" then
+                Obj = Instance.new("Frame")
+                local Size = math.random(2, 3)
+                Obj.Size = UDim2.fromOffset(Size, Size)
+                Obj.BackgroundColor3 = KittyRGB(Spec.Color)
+                Obj.BackgroundTransparency = 0.2
+                Obj.BorderSizePixel = 0
+                Obj.ZIndex = 3
+                Obj.Parent = Root
+            elseif Spec.Kind == "sparkle" then
+                Obj = BuildSprite(Root, SpriteRows.Sparkle, { W = Spec.Color }, PIXEL, false, 3)
+            elseif Spec.Kind == "leaf" then
+                Obj = BuildSprite(Root, SpriteRows.Leaf, Spec.Palette, PIXEL, false, 3)
+            elseif Spec.Kind == "heart" then
+                Obj = BuildSprite(Root, SpriteRows.Heart, Spec.Palette, PIXEL, false, 3)
+            end
+            Obj.AnchorPoint = Vector2.new(0.5, 0.5)
+            table.insert(Particles, {
+                Obj = Obj,
+                X = 0.04 + math.random() * 0.92,
+                Speed = (Spec.Kind == "snow" and 0.07 or 0.04) + math.random() * 0.04,
+                Phase = math.random(),
+                Falls = Spec.Kind == "snow" or Spec.Kind == "leaf",
+                Twinkle = Spec.Kind == "sparkle",
+            })
+        end
+    end
+
+    --// The moving 8-bit creature
+    local W = Def.Walker
+    local Walker, ShowWalker, WalkerFrames = BuildAnimated(Root, W.Frames, W.Palette, PIXEL, W.Mirror, 6)
+    Walker.AnchorPoint = Vector2.new(0.5, 1)
 
     local Start = os.clock()
     local Connection
@@ -12644,26 +12997,35 @@ local function BuildKittyDecor(Def)
 
         Gradient.Rotation = (T * 40) % 360
 
-        if Def.Mode == "walk" then
-            --// strolls back and forth on top of the window with a little hop
-            local Hop = math.abs(math.sin(T * 7))
-            Walker.Position = UDim2.new(0.5 + 0.3 * math.sin(T * 0.35), 0, 0, -12 - Hop * 3)
-            Walker.Rotation = math.sin(T * 7) * 6
-        elseif Def.Mode == "fly" then
-            --// flutters along above the window
-            Walker.Position = UDim2.new(0.5 + 0.3 * math.sin(T * 0.5), 0, 0, -28 + math.sin(T * 3) * 5)
-            Walker.Rotation = math.sin(T * 6) * 10
-        elseif Def.Mode == "float" then
-            --// drifts up the right side and fades in/out
-            local P = (T * 0.18) % 1
-            Walker.Position = UDim2.new(1, 16, 0.92 - 0.84 * P, 0)
-            Walker.Rotation = math.sin(T * 3) * 12
-            if P < 0.1 then
-                Walker.TextTransparency = 1 - P / 0.1
-            elseif P > 0.8 then
-                Walker.TextTransparency = (P - 0.8) / 0.2
-            else
-                Walker.TextTransparency = 0
+        if W.Mode == "walk" then
+            --// strolls back and forth on top of the window, stepping and hopping a tiny bit
+            local X = 0.5 + 0.3 * math.sin(T * 0.3)
+            local FacingLeft = math.cos(T * 0.3) < 0
+            local Step = math.floor(T / 0.16) % WalkerFrames + 1
+            ShowWalker(Step, FacingLeft)
+            Walker.Position = UDim2.new(X, 0, 0, (Step == 1) and 0 or -2)
+        elseif W.Mode == "fly" then
+            --// flaps along above the window
+            local Step = math.floor(T / 0.12) % WalkerFrames + 1
+            ShowWalker(Step, false)
+            Walker.Position = UDim2.new(0.5 + 0.3 * math.sin(T * 0.45), 0, 0, -16 + math.floor(math.sin(T * 3) * 5))
+        end
+
+        for _, Show in Animators do
+            Show(math.floor(T / 0.35) % 2 + 1, false)
+        end
+        for _, Bobber in Bobbers do
+            local Base = Bobber[2]
+            Bobber[1].Position = Base + UDim2.fromOffset(0, -math.floor(math.abs(math.sin(T * 2)) * 4))
+        end
+
+        for _, P in Particles do
+            local Progress = (T * P.Speed + P.Phase) % 1
+            local X = P.X + math.sin(T * 0.9 + P.Phase * 6.28) * 0.015
+            local Y = P.Falls and (-0.04 + Progress * 1.08) or (1.04 - Progress * 1.08)
+            P.Obj.Position = UDim2.fromScale(X, Y)
+            if P.Twinkle then
+                P.Obj.Visible = math.sin(T * 4 + P.Phase * 10) > -0.4
             end
         end
 
