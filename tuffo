@@ -12706,7 +12706,11 @@ local KittyThemes = {
             { Sprite = "Paw", Palette = { P={255,170,215} } },
         },
         Walker = { Frames = {"KittyA","KittyB"}, Palette = { K={28,24,34}, W={255,255,255}, P={255,140,200} }, Mode = "walk", Mirror = true },
-        Particles = { Kind = "sparkle", Count = 6, Color = {255,205,235} },
+        Sides = {
+            { Sprite = "Bow", Palette = { P={200,160,255}, W={240,230,255}, D={140,100,210} } },
+            { Sprite = "Heart", Palette = { R={200,160,255}, W={240,230,255} } },
+        },
+        Particles = { Kind = "sparkle", Count = 10, Color = {255,205,235} },
     },
     Christmas = {
         Colors = { Background={14,32,22}, Main={22,46,32}, Accent={220,40,50}, Outline={60,110,70}, Font={245,250,245},
@@ -12720,7 +12724,11 @@ local KittyThemes = {
         },
         Walker = { Frames = {"PenguinA","PenguinB"}, Palette = { K={30,34,48}, W={245,248,255}, O={255,150,40}, R={220,40,50} }, Mode = "walk", Mirror = true },
         Lights = true,
-        Particles = { Kind = "snow", Count = 12, Color = {245,248,255} },
+        Sides = {
+            { Sprite = "Holly", Palette = { G={40,150,70}, R={230,40,50} } },
+            { Sprite = "Gift", Palette = { R={40,150,70}, Y={250,250,250} } },
+        },
+        Particles = { Kind = "snow", Count = 20, Color = {245,248,255} },
     },
     Halloween = {
         Colors = { Background={18,12,22}, Main={30,20,34}, Accent={255,130,20}, Outline={90,50,110}, Font={255,236,215},
@@ -12733,7 +12741,11 @@ local KittyThemes = {
             { Frames = {"GhostA","GhostB"}, Palette = { W={240,240,255}, K={30,20,40}, P={255,160,200} }, Bob = true },
         },
         Walker = { Frames = {"BatA","BatB"}, Palette = { K={50,25,65}, R={255,60,60} }, Mode = "fly" },
-        Particles = { Kind = "sparkle", Count = 4, Color = {190,120,255} },
+        Sides = {
+            { Sprite = "WitchHat", Palette = { K={45,25,60}, O={140,60,200} } },
+            { Sprite = "Pumpkin", Palette = { O={255,130,20}, Y={255,225,90}, G={60,150,60} } },
+        },
+        Particles = { Kind = "sparkle", Count = 8, Color = {190,120,255} },
     },
     Thanksgiving = {
         Colors = { Background={34,22,14}, Main={48,32,20}, Accent={230,140,50}, Outline={120,75,40}, Font={255,240,220},
@@ -12746,7 +12758,11 @@ local KittyThemes = {
             { Sprite = "Leaf", Palette = { O={220,70,40}, R={150,40,20}, B={110,65,35} } },
         },
         Walker = { Frames = {"TurkeyA","TurkeyB"}, Palette = { R={200,50,40}, O={240,140,40}, Y={250,200,80}, B={120,70,35}, K={20,15,10} }, Mode = "walk", Mirror = true },
-        Particles = { Kind = "leaf", Count = 4, Palette = { O={240,130,40}, R={190,60,30}, B={110,65,35} } },
+        Sides = {
+            { Sprite = "Leaf", Palette = { O={250,190,60}, R={200,120,30}, B={110,65,35} } },
+            { Sprite = "Leaf", Palette = { O={200,60,35}, R={140,35,20}, B={110,65,35} } },
+        },
+        Particles = { Kind = "leaf", Count = 8, Palette = { O={240,130,40}, R={190,60,30}, B={110,65,35} } },
     },
     Valentine = {
         Colors = { Background={40,12,24}, Main={58,20,36}, Accent={255,80,130}, Outline={150,50,90}, Font={255,232,240},
@@ -12759,7 +12775,11 @@ local KittyThemes = {
             { Sprite = "Heart", Palette = { R={230,40,90}, W={255,200,220} } },
         },
         Walker = { Frames = {"KittyA","KittyB"}, Palette = { K={250,236,242}, W={60,20,40}, P={230,40,90} }, Mode = "walk", Mirror = true },
-        Particles = { Kind = "heart", Count = 5, Palette = { R={255,90,140}, W={255,210,225} } },
+        Sides = {
+            { Sprite = "Heart", Palette = { R={255,150,190}, W={255,230,240} } },
+            { Sprite = "Bow", Palette = { P={230,40,90}, W={255,200,220}, D={160,20,60} } },
+        },
+        Particles = { Kind = "heart", Count = 9, Palette = { R={255,90,140}, W={255,210,225} } },
     },
 }
 --// Colours go into the normal theme table (not ThemeOrder, so the regular selector stays as it was)
@@ -12840,34 +12860,121 @@ local function BuildAnimated(Parent, FrameKeys, Palette, Px, WithMirror, ZIndex)
     return Holder, Show, #FrameKeys
 end
 
---// A pointy ear: a rounded square turned 45 degrees, clipped by a CanvasGroup so only the top triangle shows
+--// A furry ear. Each layer is a rounded square turned 45 degrees; the CanvasGroup clips it so only the
+--// top triangle shows. Layers: dark outline, shaded outer ear, deep inner ear, fur tufts, a tuft on the tip.
+local Black = Color3.new(0, 0, 0)
+local White = Color3.new(1, 1, 1)
+
 local function KittyEar(Root, Def, Left)
+    local Outer = KittyRGB(Def.EarOuter)
+    local Inner = KittyRGB(Def.EarInner)
+    local Fur = KittyRGB(Def.EarFur or {255, 245, 250})
+    local Tilt = Left and -8 or 8
+    local Width, Height = 52, 32
+
     local Ear = Instance.new("CanvasGroup")
     Ear.BackgroundTransparency = 1
     Ear.BorderSizePixel = 0
-    Ear.AnchorPoint = Vector2.new(Left and 0 or 1, 1)
-    Ear.Size = UDim2.fromOffset(40, 20)
-    Ear.Position = Left and UDim2.new(0, 16, 0, 2) or UDim2.new(1, -16, 0, 2)
+    Ear.AnchorPoint = Vector2.new(0.5, 1)
+    Ear.Size = UDim2.fromOffset(Width, Height)
+    Ear.Position = Left and UDim2.new(0, 14 + Width / 2, 0, 3) or UDim2.new(1, -14 - Width / 2, 0, 3)
     Ear.ZIndex = 2
     Ear.Parent = Root
 
-    local Tilt = Left and -6 or 6
-    local function Triangle(Size, Color, YOffset, ZIndex)
+    --// gradient direction is set in the square's own (rotated) space, so undo the rotation to shade top -> bottom
+    local function Layer(Size, Color, YOffset, ZIndex, Top, Bottom, Radius)
         local Square = Instance.new("Frame")
         Square.AnchorPoint = Vector2.new(0.5, 0.5)
         Square.Size = UDim2.fromOffset(Size, Size)
         Square.Position = UDim2.new(0.5, 0, 1, YOffset)
         Square.Rotation = 45 + Tilt
-        Square.BackgroundColor3 = Color
+        Square.BackgroundColor3 = Color or White
         Square.BorderSizePixel = 0
         Square.ZIndex = ZIndex
         Square.Parent = Ear
         local Corner = Instance.new("UICorner")
-        Corner.CornerRadius = UDim.new(0, 5)
+        Corner.CornerRadius = UDim.new(0, Radius or 6)
         Corner.Parent = Square
+        if Top and Bottom then
+            Square.BackgroundColor3 = White
+            local Shade = Instance.new("UIGradient")
+            Shade.Rotation = 90 - (45 + Tilt)
+            Shade.Color = ColorSequence.new(Top, Bottom)
+            Shade.Parent = Square
+        end
+        return Square
     end
-    Triangle(26, KittyRGB(Def.EarOuter), 0, 1)
-    Triangle(14, KittyRGB(Def.EarInner), 3, 2)
+
+    --// outline, then the outer ear lit from the top, then the inner ear that gets deeper towards the head
+    Layer(36, Outer:Lerp(Black, 0.5), 2, 1)
+    Layer(32, nil, 2, 2, Outer:Lerp(White, 0.22), Outer:Lerp(Black, 0.15))
+    Layer(19, nil, 6, 3, Inner:Lerp(White, 0.25), Inner:Lerp(Black, 0.35), 4)
+
+    --// fur tufts fanning out of the inner ear
+    local TuftAngles = { -30, -16, -4, 8, 20, 32 }
+    for Index, Angle in ipairs(TuftAngles) do
+        local Tuft = Instance.new("Frame")
+        Tuft.AnchorPoint = Vector2.new(0.5, 1)
+        Tuft.Size = UDim2.fromOffset(Index % 2 == 0 and 1 or 2, 8 + (Index % 3) * 3)
+        Tuft.Position = UDim2.new(0.5, (Index - 3.5) * 3, 1, 2)
+        Tuft.Rotation = Angle + Tilt
+        Tuft.BackgroundColor3 = Fur
+        Tuft.BackgroundTransparency = 0.15 + (Index % 2) * 0.2
+        Tuft.BorderSizePixel = 0
+        Tuft.ZIndex = 4
+        Tuft.Parent = Ear
+        local Round = Instance.new("UICorner")
+        Round.CornerRadius = UDim.new(1, 0)
+        Round.Parent = Tuft
+    end
+
+    --// a little tuft on the tip, plus a soft shine on the outer edge
+    local TipX = math.sin(math.rad(Tilt)) * 22
+    local TipTuft = Instance.new("Frame")
+    TipTuft.AnchorPoint = Vector2.new(0.5, 1)
+    TipTuft.Size = UDim2.fromOffset(2, 7)
+    TipTuft.Position = UDim2.new(0.5, TipX, 1, -19)
+    TipTuft.Rotation = Tilt * 1.5
+    TipTuft.BackgroundColor3 = Outer:Lerp(Black, 0.4)
+    TipTuft.BorderSizePixel = 0
+    TipTuft.ZIndex = 5
+    TipTuft.Parent = Ear
+    local TipRound = Instance.new("UICorner")
+    TipRound.CornerRadius = UDim.new(1, 0)
+    TipRound.Parent = TipTuft
+
+    local Shine = Instance.new("Frame")
+    Shine.AnchorPoint = Vector2.new(0.5, 1)
+    Shine.Size = UDim2.fromOffset(2, 12)
+    Shine.Position = UDim2.new(0.5, (Left and -1 or 1) * 9 + TipX * 0.4, 1, -4)
+    Shine.Rotation = (Left and -40 or 40) + Tilt
+    Shine.BackgroundColor3 = White
+    Shine.BackgroundTransparency = 0.65
+    Shine.BorderSizePixel = 0
+    Shine.ZIndex = 5
+    Shine.Parent = Ear
+    local ShineRound = Instance.new("UICorner")
+    ShineRound.CornerRadius = UDim.new(1, 0)
+    ShineRound.Parent = Shine
+
+    --// fluffy fur where the ear meets the window
+    local BaseX = Left and (14 + Width / 2) or nil
+    for Index = 1, 4 do
+        local Fluff = Instance.new("Frame")
+        Fluff.AnchorPoint = Vector2.new(0.5, 0.5)
+        local Size = 7 + (Index % 2) * 3
+        Fluff.Size = UDim2.fromOffset(Size, Size)
+        local Offset = (Index - 2.5) * 8
+        Fluff.Position = Left and UDim2.new(0, BaseX + Offset, 0, 1) or UDim2.new(1, -14 - Width / 2 + Offset, 0, 1)
+        Fluff.BackgroundColor3 = Outer:Lerp(White, 0.08 * (Index % 2))
+        Fluff.BorderSizePixel = 0
+        Fluff.ZIndex = 3
+        Fluff.Parent = Root
+        local Round = Instance.new("UICorner")
+        Round.CornerRadius = UDim.new(1, 0)
+        Round.Parent = Fluff
+    end
+
     return Ear
 end
 
@@ -12908,7 +13015,7 @@ local function BuildKittyDecor(Def)
     local RightEar = KittyEar(Root, Def, false)
     local EarItem = BuildSprite(Root, SpriteRows[Def.EarItem.Sprite], Def.EarItem.Palette, PIXEL, false, 4)
     EarItem.AnchorPoint = Vector2.new(0.5, 0.5)
-    EarItem.Position = UDim2.new(0, 56, 0, -5)
+    EarItem.Position = UDim2.new(0, 66, 0, -6)
 
     --// Pixel stickers on the bottom corners (hanging a little outside the window)
     local Bobbers = {}
@@ -12926,8 +13033,18 @@ local function BuildKittyDecor(Def)
         local Base = IsLeft and UDim2.new(0, -6, 1, 6) or UDim2.new(1, 6, 1, 6)
         Sticker.Position = Base
         if Corner.Bob then
-            table.insert(Bobbers, { Sticker, Base })
+            table.insert(Bobbers, { Sticker, Base, 2, 0 })
         end
+    end
+
+    --// Stickers hanging off the left and right sides, swaying gently
+    for Index, Side in ipairs(Def.Sides or {}) do
+        local Sticker = BuildSprite(Root, SpriteRows[Side.Sprite], Side.Palette, PIXEL, false, 4)
+        local IsLeft = Index == 1
+        Sticker.AnchorPoint = Vector2.new(IsLeft and 0 or 1, 0.5)
+        local Base = IsLeft and UDim2.new(0, -9, 0.42, 0) or UDim2.new(1, 9, 0.62, 0)
+        Sticker.Position = Base
+        table.insert(Bobbers, { Sticker, Base, 1.3, Index })
     end
 
     --// Christmas lights along the top edge
@@ -12986,6 +13103,10 @@ local function BuildKittyDecor(Def)
     local Walker, ShowWalker, WalkerFrames = BuildAnimated(Root, W.Frames, W.Palette, PIXEL, W.Mirror, 6)
     Walker.AnchorPoint = Vector2.new(0.5, 1)
 
+    --// A baby version that tags along behind (half size)
+    local Baby, ShowBaby, BabyFrames = BuildAnimated(Root, W.Frames, W.Palette, 1, W.Mirror, 6)
+    Baby.AnchorPoint = Vector2.new(0.5, 1)
+
     local Start = os.clock()
     local Connection
     Connection = RunService.Heartbeat:Connect(function()
@@ -13004,19 +13125,29 @@ local function BuildKittyDecor(Def)
             local Step = math.floor(T / 0.16) % WalkerFrames + 1
             ShowWalker(Step, FacingLeft)
             Walker.Position = UDim2.new(X, 0, 0, (Step == 1) and 0 or -2)
+
+            --// the baby follows the same path a moment later, with quicker little steps
+            local BT = T - 1.4
+            local BabyStep = math.floor(T / 0.11) % BabyFrames + 1
+            ShowBaby(BabyStep, math.cos(BT * 0.3) < 0)
+            Baby.Position = UDim2.new(0.5 + 0.3 * math.sin(BT * 0.3), 0, 0, (BabyStep == 1) and 0 or -1)
         elseif W.Mode == "fly" then
             --// flaps along above the window
             local Step = math.floor(T / 0.12) % WalkerFrames + 1
             ShowWalker(Step, false)
             Walker.Position = UDim2.new(0.5 + 0.3 * math.sin(T * 0.45), 0, 0, -16 + math.floor(math.sin(T * 3) * 5))
+
+            local BT = T - 1.1
+            ShowBaby(math.floor(T / 0.09) % BabyFrames + 1, false)
+            Baby.Position = UDim2.new(0.5 + 0.3 * math.sin(BT * 0.45), 0, 0, -24 + math.floor(math.sin(BT * 3.6) * 4))
         end
 
         for _, Show in Animators do
             Show(math.floor(T / 0.35) % 2 + 1, false)
         end
         for _, Bobber in Bobbers do
-            local Base = Bobber[2]
-            Bobber[1].Position = Base + UDim2.fromOffset(0, -math.floor(math.abs(math.sin(T * 2)) * 4))
+            local Base, Speed, Phase = Bobber[2], Bobber[3], Bobber[4]
+            Bobber[1].Position = Base + UDim2.fromOffset(0, -math.floor(math.abs(math.sin(T * Speed + Phase)) * 4))
         end
 
         for _, P in Particles do
@@ -13029,15 +13160,21 @@ local function BuildKittyDecor(Def)
             end
         end
 
-        --// one ear twitches every few seconds, taking turns
+        --// ears slowly swivel like they're listening, and one flicks every few seconds (sometimes twice)
+        local Swivel = math.sin(T * 0.7) * 3
         local Cycle = T % 4.5
-        local Twitch = Cycle < 0.16 and math.sin(Cycle / 0.16 * math.pi) * 10 or 0
+        local Flick = 0
+        if Cycle < 0.16 then
+            Flick = math.sin(Cycle / 0.16 * math.pi) * 14
+        elseif Cycle > 0.24 and Cycle < 0.38 and math.floor(T / 9) % 2 == 0 then
+            Flick = math.sin((Cycle - 0.24) / 0.14 * math.pi) * 8
+        end
         if math.floor(T / 4.5) % 2 == 0 then
-            LeftEar.Rotation = -Twitch
-            RightEar.Rotation = 0
+            LeftEar.Rotation = -Swivel - Flick
+            RightEar.Rotation = Swivel
         else
-            LeftEar.Rotation = 0
-            RightEar.Rotation = Twitch
+            LeftEar.Rotation = -Swivel
+            RightEar.Rotation = Swivel + Flick
         end
 
         if #Lights > 0 then
