@@ -12689,59 +12689,88 @@ local function BuildKittyDecor(Def)
     return { Root = Root, Connection = Connection }
 end
 
-function Library:AddKittyThemes(Groupbox)
-    local ActiveDecor = nil
-    local Enabled = false
-    local PreviousTheme = nil
+--// Shared state, so the dropdown and toggle work together even in different groupboxes
+local ActiveDecor = nil
+local KittyEnabled = false
+local PreviousTheme = nil
+local UnloadHooked = false
 
-    local function ClearDecor()
-        if ActiveDecor then
-            if ActiveDecor.Connection then
-                ActiveDecor.Connection:Disconnect()
-            end
-            ActiveDecor.Root:Destroy()
-            ActiveDecor = nil
+local function ClearDecor()
+    if ActiveDecor then
+        if ActiveDecor.Connection then
+            ActiveDecor.Connection:Disconnect()
         end
+        ActiveDecor.Root:Destroy()
+        ActiveDecor = nil
     end
+end
 
-    local function ApplyChosen()
-        local Name = Options.ThemeDropdown and Options.ThemeDropdown.Value or "Cute"
-        local Def = KittyThemes[Name] or KittyThemes.Cute
-        ClearDecor()
-        Library:SetTheme("Kitty " .. (KittyThemes[Name] and Name or "Cute"))
-        ActiveDecor = BuildKittyDecor(Def)
+local function ApplyChosen()
+    local Name = Options.ThemeDropdown and Options.ThemeDropdown.Value or "Cute"
+    if not KittyThemes[Name] then
+        Name = "Cute"
     end
+    ClearDecor()
+    Library:SetTheme("Kitty " .. Name)
+    ActiveDecor = BuildKittyDecor(KittyThemes[Name])
+end
 
-    local Dropdown = Groupbox:AddDropdown("ThemeDropdown", {
-        Text = "Kitty Theme",
+local function HookUnload()
+    if not UnloadHooked then
+        UnloadHooked = true
+        Library:OnUnload(ClearDecor)
+    end
+end
+
+--// Groupbox methods: Groupbox:AddThemeDropdown() and Groupbox:AddThemeToggle()
+local GroupboxFuncs = BaseGroupbox.__index
+
+function GroupboxFuncs:AddThemeDropdown(Info)
+    Info = Info or {}
+    HookUnload()
+    return self:AddDropdown("ThemeDropdown", {
+        Text = Info.Text or "Kitty Theme",
         Values = table.clone(KittyThemeOrder),
-        Default = "Cute",
-        Callback = function()
-            if Enabled then
+        Default = Info.Default or "Cute",
+        Callback = function(Value)
+            if KittyEnabled then
                 ApplyChosen()
+            end
+            if Info.Callback then
+                Info.Callback(Value)
             end
         end,
     })
+end
 
-    Groupbox:AddToggle("ThemeToggle", {
-        Text = "Enable Kitty Theme",
-        Default = false,
+function GroupboxFuncs:AddThemeToggle(Info)
+    Info = Info or {}
+    HookUnload()
+    return self:AddToggle("ThemeToggle", {
+        Text = Info.Text or "Enable Kitty Theme",
+        Default = Info.Default or false,
         Callback = function(Value)
-            if Value and not Enabled then
+            if Value and not KittyEnabled then
                 local Current = Library.CurrentTheme
                 PreviousTheme = (Current and not tostring(Current):find("^Kitty ")) and Current or "Normal"
-                Enabled = true
+                KittyEnabled = true
                 ApplyChosen()
-            elseif not Value and Enabled then
-                Enabled = false
+            elseif not Value and KittyEnabled then
+                KittyEnabled = false
                 ClearDecor()
                 Library:SetTheme(PreviousTheme or "Normal")
             end
+            if Info.Callback then
+                Info.Callback(Value)
+            end
         end,
     })
+end
 
-    Library:OnUnload(ClearDecor)
-
+--// Still works too: adds both at once
+function Library:AddKittyThemes(Groupbox)
+    local Dropdown = Groupbox:AddThemeDropdown()
+    Groupbox:AddThemeToggle()
     return Dropdown
 end
 end --// Kitty themes
