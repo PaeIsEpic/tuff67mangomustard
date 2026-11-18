@@ -505,7 +505,7 @@ local Templates = {
         Font = Enum.Font.Code,
         ToggleKeybind = Enum.KeyCode.RightControl,
 
-        ShowMobileButtons = true,
+        ShowMobileButtons = false,
         MobileButtonsSide = "Left",
 
         UnlockMouseWhileOpen = true,
@@ -13394,6 +13394,826 @@ Library:OnUnload(function()
     end
 end)
 
+--// ===== Profile box + music player (Groupbox:AddProfileBox / Groupbox:AddMusic) ===== \\--
+local ElementFuncs = BaseGroupbox.__index
+local MarketplaceService = game:GetService("MarketplaceService")
+
+local function UICorner(Object, Radius)
+    New("UICorner", { CornerRadius = Radius or UDim.new(0, Library.CornerRadius), Parent = Object })
+end
+
+local function UIOutline(Object)
+    New("UIStroke", { Color = "OutlineColor", Parent = Object })
+end
+
+local function MakeLabel(Parent, Props)
+    local Merged = {
+        BackgroundTransparency = 1,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        TextSize = 13,
+    }
+    for Key, Value in Props do
+        Merged[Key] = Value
+    end
+    Merged.Parent = Parent --// set last so ZIndex is copied from the parent
+    return New("TextLabel", Merged)
+end
+
+local function SetIconImage(Image, Name)
+    local Icon = Library:GetIcon(Name)
+    Image.Image = Icon and Icon.Url or ""
+    Image.ImageRectOffset = Icon and Icon.ImageRectOffset or Vector2.zero
+    Image.ImageRectSize = Icon and Icon.ImageRectSize or Vector2.zero
+end
+
+local function MakeIcon(Parent, Name, Size, Color)
+    local Image = New("ImageLabel", {
+        BackgroundTransparency = 1,
+        Size = UDim2.fromOffset(Size, Size),
+        ImageColor3 = Color or "FontColor",
+        Parent = Parent,
+    })
+    SetIconImage(Image, Name)
+    return Image
+end
+
+local function TwoDigits(Seconds)
+    Seconds = math.max(0, math.floor(Seconds))
+    return string.format("%02d:%02d:%02d", Seconds // 3600, (Seconds % 3600) // 60, Seconds % 60)
+end
+
+local function ShortTime(Seconds)
+    Seconds = math.max(0, math.floor(Seconds or 0))
+    return string.format("%d:%02d", Seconds // 60, Seconds % 60)
+end
+
+local function RegisterElement(Groupbox, Element)
+    Element.Visible = true
+    Element.Destroyed = false
+    function Element:SetVisible(Value)
+        Element.Visible = Value == true
+        Element.Holder.Visible = Element.Visible
+        Groupbox:Resize()
+    end
+    table.insert(Groupbox.Elements, Element)
+    Groupbox:Resize()
+    return Element
+end
+
+local function UnregisterElement(Groupbox, Element)
+    local Index = table.find(Groupbox.Elements, Element)
+    if Index then
+        table.remove(Groupbox.Elements, Index)
+    end
+    Groupbox:Resize()
+end
+
+local GoodColor = Color3.fromRGB(96, 216, 118)
+local OkColor = Color3.fromRGB(255, 196, 64)
+local BadColor = Color3.fromRGB(255, 86, 86)
+
+--// Used by Tab:AddProfileBox: a full-width card that sits above both groupbox columns.
+local PROFILE_HEIGHT = 96
+function Library:_BuildProfileBox(Tab, Parent, Info)
+    Info = Info or {}
+    local Player = Players.LocalPlayer
+
+    local Holder = New("Frame", {
+        BackgroundColor3 = "MainColor",
+        ClipsDescendants = true,
+        Position = UDim2.fromOffset(2, 4),
+        Size = UDim2.new(1, -6, 0, PROFILE_HEIGHT),
+        Parent = Parent,
+    })
+    UICorner(Holder)
+    UIOutline(Holder)
+
+    --// soft accent glow across the top of the card
+    local Glow = New("Frame", {
+        BackgroundColor3 = "AccentColor",
+        BorderSizePixel = 0,
+        Size = UDim2.new(1, 0, 0, 34),
+        Parent = Holder,
+    })
+    New("UIGradient", {
+        Rotation = 90,
+        Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.78), NumberSequenceKeypoint.new(1, 1) }),
+        Parent = Glow,
+    })
+
+    --// avatar with a spinning gradient ring and an online dot
+    local Ring = New("Frame", {
+        AnchorPoint = Vector2.new(0, 0.5),
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 10, 0.5, 0),
+        Size = UDim2.fromOffset(62, 62),
+        Parent = Holder,
+    })
+    UICorner(Ring, UDim.new(1, 0))
+    local RingStroke = New("UIStroke", { Thickness = 2.5, Color = Color3.new(1, 1, 1), Parent = Ring })
+    local RingGradient = New("UIGradient", {
+        Color = function()
+            return ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Library.Scheme.AccentColor),
+                ColorSequenceKeypoint.new(0.5, Library.Scheme.FontColor),
+                ColorSequenceKeypoint.new(1, Library.Scheme.AccentColor),
+            })
+        end,
+        Parent = RingStroke,
+    })
+    local Avatar = New("ImageLabel", {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        BackgroundColor3 = "BackgroundColor",
+        Position = UDim2.fromScale(0.5, 0.5),
+        Size = UDim2.fromOffset(56, 56),
+        Parent = Ring,
+    })
+    UICorner(Avatar, UDim.new(1, 0))
+    local Dot = New("Frame", {
+        AnchorPoint = Vector2.new(1, 1),
+        BackgroundColor3 = GoodColor,
+        Position = UDim2.new(1, -1, 1, -1),
+        Size = UDim2.fromOffset(13, 13),
+        ZIndex = Ring.ZIndex + 2,
+        Parent = Ring,
+    })
+    UICorner(Dot, UDim.new(1, 0))
+    New("UIStroke", { Color = "MainColor", Thickness = 2, Parent = Dot })
+
+    task.spawn(function()
+        local Ok, Image = pcall(function()
+            return Players:GetUserThumbnailAsync(Player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+        end)
+        if Ok and Image and Avatar.Parent then
+            Avatar.Image = Image
+        end
+    end)
+
+    --// text: greeting, handle + version, clock + session, game + executor
+    local TextLeft = 84
+    local TextWidth = -(TextLeft + 276) --// leaves room for the two stat chips on the right
+    local GreetIcon = MakeIcon(Holder, "sun", 16, "AccentColor")
+    GreetIcon.Position = UDim2.fromOffset(TextLeft, 11)
+
+    local Greeting = MakeLabel(Holder, {
+        Position = UDim2.fromOffset(TextLeft + 21, 8),
+        Size = UDim2.new(1, TextWidth - 21, 0, 22),
+        TextSize = 18,
+    })
+    local Handle = MakeLabel(Holder, {
+        Position = UDim2.fromOffset(TextLeft, 32),
+        Size = UDim2.new(1, TextWidth, 0, 16),
+        TextSize = 14,
+        TextTransparency = 0.2,
+    })
+    local Clock = MakeLabel(Holder, {
+        Position = UDim2.fromOffset(TextLeft, 50),
+        Size = UDim2.new(1, TextWidth, 0, 16),
+        TextSize = 14,
+    })
+    local Place = MakeLabel(Holder, {
+        Position = UDim2.fromOffset(TextLeft, 70),
+        Size = UDim2.new(1, TextWidth, 0, 16),
+        TextSize = 12,
+        TextTransparency = 0.45,
+        Text = "Loading game...",
+    })
+
+    local Version = Info.Version
+    local function RefreshHandle()
+        local Text = "@" .. Player.Name
+        if Version and tostring(Version) ~= "" then
+            Text ..= "  ·  Version <b>" .. tostring(Version) .. "</b>"
+        end
+        Handle.Text = Text
+    end
+    RefreshHandle()
+
+    task.spawn(function()
+        local GameName = "Unknown game"
+        pcall(function()
+            GameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
+        end)
+        local Executor = nil
+        pcall(function()
+            Executor = identifyexecutor and identifyexecutor() or nil
+        end)
+        if Place.Parent then
+            Place.Text = "Playing " .. GameName .. (Executor and ("  ·  " .. tostring(Executor)) or "")
+        end
+    end)
+
+    --// FPS + ping chips with little bar graphs
+    local function MakeChip(RightOffset)
+        local Chip = New("Frame", {
+            AnchorPoint = Vector2.new(1, 0.5),
+            BackgroundColor3 = "BackgroundColor",
+            Position = UDim2.new(1, RightOffset, 0.5, 0),
+            Size = UDim2.fromOffset(128, 60),
+            Parent = Holder,
+        })
+        UICorner(Chip)
+        UIOutline(Chip)
+        local Value = MakeLabel(Chip, {
+            Position = UDim2.fromOffset(0, 6),
+            Size = UDim2.new(1, 0, 0, 18),
+            TextSize = 16,
+            TextXAlignment = Enum.TextXAlignment.Center,
+            Text = "--",
+        })
+        local Bars = {}
+        for Index = 1, 14 do
+            local Bar = New("Frame", {
+                AnchorPoint = Vector2.new(0, 1),
+                BackgroundColor3 = GoodColor,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 9 + (Index - 1) * 8, 1, -7),
+                Size = UDim2.fromOffset(6, 2),
+                Parent = Chip,
+            })
+            UICorner(Bar, UDim.new(0, 1))
+            Bars[Index] = Bar
+        end
+        return Value, Bars
+    end
+    local FpsLabel, FpsBars = MakeChip(-142)
+    local PingLabel, PingBars = MakeChip(-8)
+
+    local FpsHistory, PingHistory = {}, {}
+    local function Push(History, Value)
+        table.insert(History, Value)
+        if #History > 14 then
+            table.remove(History, 1)
+        end
+    end
+    local function DrawBars(Bars, History, Max, ColorFor)
+        for Index, Bar in Bars do
+            local Value = History[#History - (#Bars - Index)]
+            if Value then
+                Bar.Size = UDim2.fromOffset(6, math.clamp(math.floor(Value / Max * 22), 2, 22))
+                Bar.BackgroundColor3 = ColorFor(Value)
+                Bar.BackgroundTransparency = 0.15 + (1 - Index / #Bars) * 0.5
+            else
+                Bar.Size = UDim2.fromOffset(6, 2)
+                Bar.BackgroundTransparency = 0.7
+            end
+        end
+    end
+    local function FpsColor(Value)
+        return Value >= 50 and GoodColor or (Value >= 30 and OkColor or BadColor)
+    end
+    local function PingColor(Value)
+        return Value <= 90 and GoodColor or (Value <= 180 and OkColor or BadColor)
+    end
+
+    local Started = os.clock()
+    local Frames, WindowStart = 0, os.clock()
+    local Connection = RunService.Heartbeat:Connect(function()
+        Frames += 1
+        RingGradient.Rotation = (os.clock() * 90) % 360
+
+        local Now = os.clock()
+        if Now - WindowStart < 0.5 then
+            return
+        end
+        local Fps = math.floor(Frames / (Now - WindowStart) + 0.5)
+        Frames, WindowStart = 0, Now
+
+        local Ping = 0
+        pcall(function()
+            Ping = math.floor(Player:GetNetworkPing() * 1000 + 0.5)
+        end)
+
+        Push(FpsHistory, Fps)
+        Push(PingHistory, Ping)
+        FpsLabel.Text = "<b>" .. Fps .. "</b> FPS"
+        FpsLabel.TextColor3 = FpsColor(Fps)
+        PingLabel.Text = "<b>" .. Ping .. "</b> MS"
+        PingLabel.TextColor3 = PingColor(Ping)
+        DrawBars(FpsBars, FpsHistory, 60, FpsColor)
+        DrawBars(PingBars, PingHistory, 250, PingColor)
+
+        local Hour = tonumber(os.date("%H"))
+        local Part, Icon
+        if Hour >= 5 and Hour < 12 then
+            Part, Icon = "Morning", "sunrise"
+        elseif Hour >= 12 and Hour < 17 then
+            Part, Icon = "Afternoon", "sun"
+        elseif Hour >= 17 and Hour < 21 then
+            Part, Icon = "Evening", "sunset"
+        else
+            Part, Icon = "Night", "moon"
+        end
+        local GreetText = "<b>Good " .. Part .. ", " .. Player.DisplayName .. "</b>"
+        if Greeting.Text ~= GreetText then
+            Greeting.Text = GreetText
+            SetIconImage(GreetIcon, Icon)
+        end
+        Clock.Text = os.date("%H:%M:%S") .. "  ·  Session <b>" .. TwoDigits(Now - Started) .. "</b>"
+    end)
+    Library:GiveSignal(Connection)
+
+    local Profile = { Holder = Holder, Height = PROFILE_HEIGHT, Visible = true, Destroyed = false, Type = "ProfileBox" }
+    function Profile:SetVersion(NewVersion)
+        Version = NewVersion
+        RefreshHandle()
+    end
+    function Profile:SetVisible(Value)
+        Profile.Visible = Value == true
+        Holder.Visible = Profile.Visible
+        Tab:RefreshSides()
+    end
+    function Profile:Destroy()
+        if Profile.Destroyed then
+            return
+        end
+        Profile.Destroyed = true
+        Connection:Disconnect()
+        Holder:Destroy()
+        Tab:RefreshSides()
+    end
+    return Profile
+end
+
+--// Groupbox:AddMusic({ Volume = 0.5 })
+--// Paste a Roblox audio ID / link, or the name of a music file in your executor's workspace folder.
+function ElementFuncs:AddMusic(Info)
+    if self.Destroyed then
+        return nil
+    end
+    Info = Info or {}
+    local Groupbox = self
+    local GetAsset = getcustomasset or getsynasset
+
+    local Sound = Instance.new("Sound")
+    Sound.Name = "ObsidianMusic"
+    Sound.Volume = Info.Volume or 0.5
+    Sound.Parent = SoundService
+
+    local Queue = {}
+    local Current = 0
+
+    local Holder = New("Frame", {
+        BackgroundColor3 = "MainColor",
+        ClipsDescendants = true,
+        Size = UDim2.new(1, 0, 0, 156),
+        Parent = Groupbox.Container,
+    })
+    UICorner(Holder)
+    UIOutline(Holder)
+
+    --// spinning vinyl
+    local Disc = New("Frame", {
+        BackgroundColor3 = Color3.fromRGB(18, 18, 20),
+        Position = UDim2.fromOffset(10, 10),
+        Size = UDim2.fromOffset(48, 48),
+        Parent = Holder,
+    })
+    UICorner(Disc, UDim.new(1, 0))
+    New("UIStroke", { Color = "AccentColor", Thickness = 1.5, Parent = Disc })
+    for _, Size in { 38, 28 } do
+        local Groove = New("Frame", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundTransparency = 1,
+            Position = UDim2.fromScale(0.5, 0.5),
+            Size = UDim2.fromOffset(Size, Size),
+            Parent = Disc,
+        })
+        UICorner(Groove, UDim.new(1, 0))
+        New("UIStroke", { Color = Color3.fromRGB(55, 55, 60), Thickness = 1, Parent = Groove })
+    end
+    local DiscLabel = New("Frame", {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        BackgroundColor3 = "AccentColor",
+        Position = UDim2.fromScale(0.5, 0.5),
+        Size = UDim2.fromOffset(16, 16),
+        Parent = Disc,
+    })
+    UICorner(DiscLabel, UDim.new(1, 0))
+    New("Frame", {
+        AnchorPoint = Vector2.new(0.5, 1),
+        BackgroundColor3 = Color3.new(1, 1, 1),
+        BackgroundTransparency = 0.55,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.5, 0, 0.5, -9),
+        Size = UDim2.fromOffset(2, 12),
+        Parent = Disc,
+    })
+
+    --// track info
+    MakeLabel(Holder, {
+        Position = UDim2.fromOffset(68, 9),
+        Size = UDim2.new(1, -160, 0, 14),
+        TextSize = 12,
+        TextColor3 = "AccentColor",
+        Text = "<b>NOW PLAYING</b>",
+    })
+    local TrackName = MakeLabel(Holder, {
+        Position = UDim2.fromOffset(68, 24),
+        Size = UDim2.new(1, -160, 0, 18),
+        TextSize = 15,
+        Text = "Nothing yet",
+    })
+    local Status = MakeLabel(Holder, {
+        Position = UDim2.fromOffset(68, 42),
+        Size = UDim2.new(1, -160, 0, 14),
+        TextSize = 12,
+        TextTransparency = 0.45,
+        Text = "Paste a song below",
+    })
+
+    --// visualizer bars driven by the song's loudness
+    local VisualBars = {}
+    for Index = 1, 12 do
+        local Bar = New("Frame", {
+            AnchorPoint = Vector2.new(0, 1),
+            BackgroundColor3 = "AccentColor",
+            BorderSizePixel = 0,
+            Position = UDim2.new(1, -86 + (Index - 1) * 6.5, 0, 56),
+            Size = UDim2.fromOffset(4, 2),
+            Parent = Holder,
+        })
+        UICorner(Bar, UDim.new(0, 1))
+        VisualBars[Index] = Bar
+    end
+
+    --// progress bar (click / drag to seek)
+    local Elapsed = MakeLabel(Holder, {
+        Position = UDim2.fromOffset(10, 66),
+        Size = UDim2.fromOffset(38, 14),
+        TextSize = 12,
+        Text = "0:00",
+    })
+    local Total = MakeLabel(Holder, {
+        AnchorPoint = Vector2.new(1, 0),
+        Position = UDim2.new(1, -10, 0, 66),
+        Size = UDim2.fromOffset(38, 14),
+        TextSize = 12,
+        TextXAlignment = Enum.TextXAlignment.Right,
+        Text = "0:00",
+    })
+    local Track = New("Frame", {
+        BackgroundColor3 = "BackgroundColor",
+        Position = UDim2.new(0, 50, 0, 70),
+        Size = UDim2.new(1, -100, 0, 6),
+        Parent = Holder,
+    })
+    UICorner(Track, UDim.new(1, 0))
+    local Fill = New("Frame", {
+        BackgroundColor3 = "AccentColor",
+        Size = UDim2.fromScale(0, 1),
+        Parent = Track,
+    })
+    UICorner(Fill, UDim.new(1, 0))
+    local Knob = New("Frame", {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        BackgroundColor3 = "FontColor",
+        Position = UDim2.fromScale(0, 0.5),
+        Size = UDim2.fromOffset(10, 10),
+        Parent = Track,
+    })
+    UICorner(Knob, UDim.new(1, 0))
+    local SeekButton = New("TextButton", {
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 0, 0.5, -8),
+        Size = UDim2.new(1, 0, 0, 16),
+        Text = "",
+        Parent = Track,
+    })
+
+    --// control buttons
+    local function ControlButton(IconName, X, Size, Filled)
+        local Button = New("TextButton", {
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            BackgroundColor3 = Filled and "AccentColor" or "BackgroundColor",
+            Position = UDim2.new(0.5, X, 0, 102),
+            Size = UDim2.fromOffset(Size, Size),
+            Text = "",
+            Parent = Holder,
+        })
+        UICorner(Button, UDim.new(1, 0))
+        if not Filled then
+            UIOutline(Button)
+        end
+        local Icon = MakeIcon(Button, IconName, math.floor(Size * 0.5), Filled and "BackgroundColor" or "FontColor")
+        Icon.AnchorPoint = Vector2.new(0.5, 0.5)
+        Icon.Position = UDim2.fromScale(0.5, 0.5)
+        return Button, Icon
+    end
+    local PrevButton = ControlButton("skip-back", -56, 28)
+    local PlayButton, PlayIcon = ControlButton("play", -16, 34, true)
+    local NextButton = ControlButton("skip-forward", 24, 28)
+    local LoopButton, LoopIcon = ControlButton("repeat", 60, 28)
+
+    --// volume (click / drag the little bar)
+    local VolumeIcon = MakeIcon(Holder, "volume-2", 14)
+    VolumeIcon.AnchorPoint = Vector2.new(0, 0.5)
+    VolumeIcon.Position = UDim2.new(1, -84, 0, 102)
+    local VolumeTrack = New("Frame", {
+        AnchorPoint = Vector2.new(0, 0.5),
+        BackgroundColor3 = "BackgroundColor",
+        Position = UDim2.new(1, -66, 0, 102),
+        Size = UDim2.fromOffset(56, 5),
+        Parent = Holder,
+    })
+    UICorner(VolumeTrack, UDim.new(1, 0))
+    local VolumeFill = New("Frame", {
+        BackgroundColor3 = "AccentColor",
+        Size = UDim2.fromScale(Sound.Volume, 1),
+        Parent = VolumeTrack,
+    })
+    UICorner(VolumeFill, UDim.new(1, 0))
+    local VolumeButton = New("TextButton", {
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 0, 0.5, -8),
+        Size = UDim2.new(1, 0, 0, 16),
+        Text = "",
+        Parent = VolumeTrack,
+    })
+
+    local QueueLabel = MakeLabel(Holder, {
+        AnchorPoint = Vector2.new(0, 0.5),
+        Position = UDim2.new(0, 10, 0, 102),
+        Size = UDim2.fromOffset(70, 14),
+        TextSize = 12,
+        TextTransparency = 0.45,
+        Text = "Queue 0",
+    })
+
+    --// paste box
+    local Box = New("TextBox", {
+        BackgroundColor3 = "BackgroundColor",
+        ClearTextOnFocus = false,
+        PlaceholderText = Info.Placeholder or "Paste a music ID or file name, then press Enter",
+        Position = UDim2.fromOffset(10, 124),
+        Size = UDim2.new(1, -20, 0, 24),
+        TextSize = 13,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = Holder,
+    })
+    UICorner(Box)
+    UIOutline(Box)
+    New("UIPadding", { PaddingLeft = UDim.new(0, 8), PaddingRight = UDim.new(0, 8), Parent = Box })
+
+    local function Notify(Text)
+        pcall(function()
+            Library:Notify({ Title = "Music", Description = Text, Time = 4 })
+        end)
+    end
+
+    --// Works out what was pasted: an ID, a roblox.com link, rbxassetid://, or a file in the workspace folder
+    local function Resolve(Text)
+        Text = (Text or ""):gsub("^%s+", ""):gsub("%s+$", ""):gsub('^"(.*)"$', "%1"):gsub("^'(.*)'$", "%1")
+        if Text == "" then
+            return nil, "Nothing pasted"
+        end
+        local Id = Text:match("^%d+$") or Text:match("^rbxassetid://(%d+)$") or Text:match("roblox%.com/[%w%-]+/(%d+)")
+        if Id then
+            return { SoundId = "rbxassetid://" .. Id, Name = "Audio " .. Id, AssetId = tonumber(Id) }
+        end
+        if Text:match("^rbxasset://") then
+            return { SoundId = Text, Name = Text:match("([^/]+)$") or Text }
+        end
+
+        if not GetAsset then
+            return nil, "Your executor can't load music files (no getcustomasset)"
+        end
+        local Candidates = { Text, "music/" .. Text, Text .. ".mp3", "music/" .. Text .. ".mp3", Text .. ".ogg", "music/" .. Text .. ".ogg" }
+        for _, Path in Candidates do
+            local Exists = false
+            pcall(function()
+                Exists = isfile and isfile(Path) or false
+            end)
+            if Exists then
+                local Ok, Asset = pcall(GetAsset, Path)
+                if Ok and Asset then
+                    local FileName = Path:match("([^/\\]+)$") or Path
+                    return { SoundId = Asset, Name = FileName:gsub("%.%w+$", "") }
+                end
+            end
+        end
+        return nil, "Couldn't find \"" .. Text .. "\". Put the file in your executor's workspace folder (or workspace/music)"
+    end
+
+    local Looping = false
+    local function RefreshButtons()
+        SetIconImage(PlayIcon, Sound.IsPlaying and "pause" or "play")
+        LoopIcon.ImageColor3 = Looping and Library.Scheme.AccentColor or Library.Scheme.FontColor
+        QueueLabel.Text = "Queue " .. (#Queue > 0 and (Current .. "/" .. #Queue) or "0")
+        if Current == 0 then
+            Status.Text = "Paste a song below"
+        else
+            Status.Text = (Sound.IsPlaying and "Playing" or "Paused") .. (Looping and "  ·  Looping" or "")
+        end
+    end
+
+    local LoadToken = 0
+    local function PlayIndex(Index)
+        local Entry = Queue[Index]
+        if not Entry then
+            return
+        end
+        Current = Index
+        LoadToken += 1
+        local Token = LoadToken
+        Sound:Stop()
+        Sound.SoundId = Entry.SoundId
+        Sound.TimePosition = 0
+        Sound.Looped = Looping
+        Sound:Play()
+        TrackName.Text = Entry.Name
+        RefreshButtons()
+
+        --// get the real name for Roblox audio, and warn if it never loads
+        if Entry.AssetId and not Entry.NameFetched then
+            Entry.NameFetched = true
+            task.spawn(function()
+                local Ok, Product = pcall(function()
+                    return MarketplaceService:GetProductInfo(Entry.AssetId)
+                end)
+                if Ok and Product and Product.Name then
+                    Entry.Name = Product.Name
+                    if Current == Index and TrackName.Parent then
+                        TrackName.Text = Entry.Name
+                    end
+                end
+            end)
+        end
+        task.delay(8, function()
+            if Token == LoadToken and Sound.Parent and not Sound.IsLoaded then
+                Notify("\"" .. Entry.Name .. "\" didn't load. The audio might be private or the file unsupported.")
+            end
+        end)
+    end
+
+    local function AddAndPlay(Text)
+        local Entry, Err = Resolve(Text)
+        if not Entry then
+            Notify(Err)
+            return false
+        end
+        table.insert(Queue, Entry)
+        PlayIndex(#Queue)
+        return true
+    end
+
+    local Connections = {}
+    local function Connect(Signal, Callback)
+        local Connection = Signal:Connect(Callback)
+        table.insert(Connections, Connection)
+        Library:GiveSignal(Connection)
+        return Connection
+    end
+
+    Connect(Box.FocusLost, function(EnterPressed)
+        if EnterPressed and Box.Text ~= "" then
+            if AddAndPlay(Box.Text) then
+                Box.Text = ""
+            end
+        end
+    end)
+
+    Connect(PlayButton.MouseButton1Click, function()
+        if Current == 0 then
+            if Box.Text ~= "" and AddAndPlay(Box.Text) then
+                Box.Text = ""
+            end
+            return
+        end
+        if Sound.IsPlaying then
+            Sound:Pause()
+        else
+            Sound:Resume()
+        end
+        RefreshButtons()
+    end)
+    Connect(PrevButton.MouseButton1Click, function()
+        if Sound.TimePosition > 3 or Current <= 1 then
+            Sound.TimePosition = 0
+        else
+            PlayIndex(Current - 1)
+        end
+    end)
+    Connect(NextButton.MouseButton1Click, function()
+        if Current < #Queue then
+            PlayIndex(Current + 1)
+        elseif #Queue > 0 then
+            PlayIndex(1)
+        end
+    end)
+    Connect(LoopButton.MouseButton1Click, function()
+        Looping = not Looping
+        Sound.Looped = Looping
+        RefreshButtons()
+    end)
+    Connect(Sound.Ended, function()
+        if not Looping and Current < #Queue then
+            PlayIndex(Current + 1)
+        else
+            RefreshButtons()
+        end
+    end)
+
+    --// click + drag helpers for the seek bar and volume bar
+    local function MakeDraggableBar(Button, TrackFrame, OnRatio)
+        local Dragging = false
+        local function Apply(X)
+            local Ratio = math.clamp((X - TrackFrame.AbsolutePosition.X) / math.max(TrackFrame.AbsoluteSize.X, 1), 0, 1)
+            OnRatio(Ratio)
+        end
+        Connect(Button.InputBegan, function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+                Dragging = true
+                Apply(Input.Position.X)
+            end
+        end)
+        Connect(UserInputService.InputChanged, function(Input)
+            if Dragging and (Input.UserInputType == Enum.UserInputType.MouseMovement or Input.UserInputType == Enum.UserInputType.Touch) then
+                Apply(Input.Position.X)
+            end
+        end)
+        Connect(UserInputService.InputEnded, function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+                Dragging = false
+            end
+        end)
+    end
+    MakeDraggableBar(SeekButton, Track, function(Ratio)
+        if Sound.TimeLength > 0 then
+            Sound.TimePosition = Ratio * Sound.TimeLength
+        end
+    end)
+    MakeDraggableBar(VolumeButton, VolumeTrack, function(Ratio)
+        Sound.Volume = Ratio
+        VolumeFill.Size = UDim2.fromScale(Ratio, 1)
+        SetIconImage(VolumeIcon, Ratio == 0 and "volume-x" or (Ratio < 0.5 and "volume-1" or "volume-2"))
+    end)
+
+    --// animation: disc spin, progress, visualizer
+    local Smoothed = 0
+    Connect(RunService.Heartbeat, function(DeltaTime)
+        local Playing = Sound.IsPlaying
+        if Playing then
+            Disc.Rotation = (Disc.Rotation + DeltaTime * 140) % 360
+        end
+
+        local Length = Sound.TimeLength
+        local Ratio = Length > 0 and math.clamp(Sound.TimePosition / Length, 0, 1) or 0
+        Fill.Size = UDim2.fromScale(Ratio, 1)
+        Knob.Position = UDim2.fromScale(Ratio, 0.5)
+        Elapsed.Text = ShortTime(Sound.TimePosition)
+        Total.Text = ShortTime(Length)
+
+        local Loudness = Playing and math.clamp(Sound.PlaybackLoudness / 600, 0, 1) or 0
+        Smoothed += (Loudness - Smoothed) * math.min(DeltaTime * 12, 1)
+        local T = os.clock()
+        for Index, Bar in VisualBars do
+            local Wiggle = 0.55 + 0.45 * math.abs(math.sin(T * (3 + Index * 0.7) + Index))
+            local Height = Playing and math.max(2, math.floor(Smoothed * Wiggle * 30)) or 2
+            Bar.Size = UDim2.fromOffset(4, Height)
+        end
+    end)
+
+    Library:OnUnload(function()
+        Sound:Destroy()
+    end)
+
+    local Music = { Holder = Holder, Text = "Music", Type = "Music", Sound = Sound, Queue = Queue }
+    function Music:Play(Text)
+        return AddAndPlay(Text)
+    end
+    function Music:Pause()
+        Sound:Pause()
+        RefreshButtons()
+    end
+    function Music:Resume()
+        Sound:Resume()
+        RefreshButtons()
+    end
+    function Music:Stop()
+        Sound:Stop()
+        RefreshButtons()
+    end
+    function Music:SetVolume(Volume)
+        Sound.Volume = math.clamp(Volume, 0, 1)
+        VolumeFill.Size = UDim2.fromScale(Sound.Volume, 1)
+    end
+    function Music:Destroy()
+        Music.Destroyed = true
+        for _, Connection in Connections do
+            Connection:Disconnect()
+        end
+        Sound:Destroy()
+        Holder:Destroy()
+        UnregisterElement(Groupbox, Music)
+    end
+
+    RefreshButtons()
+    return RegisterElement(Groupbox, Music)
+end
+
 --// Shared state, so the dropdown and toggle work together even in different groupboxes
 local ActiveDecor = nil
 local KittyEnabled = false
@@ -16345,12 +17165,27 @@ function Library:CreateWindow(WindowInfo)
         end
 
         function Tab:RefreshSides()
-            local Offset = WarningBoxHolder.Visible and WarningBox.Size.Y.Offset + 8 or 0
+            --// The profile box (Tab:AddProfileBox) sits on top, across both columns
+            local Profile = Tab.ProfileBox
+            local ProfileOffset = (Profile and not Profile.Destroyed and Profile.Visible) and (Profile.Height + 6) or 0
+            WarningBoxHolder.Position = UDim2.fromOffset(0, 7 + ProfileOffset)
+
+            local Offset = ProfileOffset + (WarningBoxHolder.Visible and WarningBox.Size.Y.Offset + 8 or 0)
             for _, Side in Tab.Sides do
                 Side.Position = UDim2.new(Side.Position.X.Scale, 0, 0, Offset)
                 Side.Size = UDim2.new(0.5, -3, 1, -Offset)
             end
 
+        end
+
+        --// Tabs.Main:AddProfileBox({ Version = "5.649" }) -> a full-width profile card above the groupboxes
+        function Tab:AddProfileBox(Info)
+            if Tab.ProfileBox and not Tab.ProfileBox.Destroyed then
+                Tab.ProfileBox:Destroy()
+            end
+            Tab.ProfileBox = Library:_BuildProfileBox(Tab, TabContainer, Info)
+            Tab:RefreshSides()
+            return Tab.ProfileBox
         end
 
         function Tab:Resize(ResizeUserPanelBox: boolean?)
@@ -17632,7 +18467,10 @@ function Library:CreateWindow(WindowInfo)
         end
 
         function Tab:GetContentOffset()
-            local Offset = WarningBoxHolder.Visible and WarningBox.Size.Y.Offset + 8 or 0
+            local Profile = Tab.ProfileBox
+            local ProfileOffset = (Profile and not Profile.Destroyed and Profile.Visible) and (Profile.Height + 6) or 0
+            WarningBoxHolder.Position = UDim2.fromOffset(0, 7 + ProfileOffset)
+            local Offset = ProfileOffset + (WarningBoxHolder.Visible and WarningBox.Size.Y.Offset + 8 or 0)
             if SubTabBar and SubTabBar.Visible then
                 SubTabBar.Position = UDim2.new(0, 2, 0, Offset)
                 Offset += SUBTAB_BAR_HEIGHT + 6
@@ -19684,28 +20522,20 @@ function Library:CreateWindow(WindowInfo)
         end
     end)
 
-    --// Trash: permanently removes the window and all registered resources
-    local TrashButton = CreateSquareMobileButton("trash-2")
-    TrashButton:SetIconColor(Color3.fromRGB(220, 80, 80))
-    TrashButton.Button.MouseButton1Click:Connect(function()
-        Library:Unload()
-    end)
+    --// (trash button removed)
 
     if WindowInfo.MobileButtonsSide == "Right" then
         ToggleButton.Button.Position = UDim2.new(1, -6, 0, 6)
         ToggleButton.Button.AnchorPoint = Vector2.new(1, 0)
         LockButton.Button.Position = UDim2.new(1, -6, 0, 46)
         LockButton.Button.AnchorPoint = Vector2.new(1, 0)
-        TrashButton.Button.Position = UDim2.new(1, -6, 0, 86)
-        TrashButton.Button.AnchorPoint = Vector2.new(1, 0)
     else
         LockButton.Button.Position = UDim2.fromOffset(6, 46)
-        TrashButton.Button.Position = UDim2.fromOffset(6, 86)
     end
-    if WindowInfo.ShowMobileButtons == false then
+    --// The side buttons are hidden unless the window asks for them with ShowMobileButtons = true
+    if WindowInfo.ShowMobileButtons ~= true then
         ToggleButton.Button.Visible = false
         LockButton.Button.Visible = false
-        TrashButton.Button.Visible = false
     end
 
     --// Execution \\--
