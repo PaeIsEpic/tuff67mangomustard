@@ -12790,7 +12790,105 @@ local SpriteRows = {
         "WWW",
         ".W.",
     },
+    BunnyA = {
+        "......W.W...",
+        "......WPWP..",
+        "......WPWP..",
+        ".....WWWWWW.",
+        ".....WWKWWW.",
+        "..WWWWWWWWP.",
+        ".WWWWWWWWW..",
+        "WWWWWWWWWW..",
+        ".WWWWWWWWW..",
+        "..WW...WW...",
+    },
+    BunnyB = {
+        "......W.W...",
+        "......WPWP..",
+        "......WPWP..",
+        ".....WWWWWW.",
+        ".....WWKWWW.",
+        "..WWWWWWWWP.",
+        ".WWWWWWWWW..",
+        "WWWWWWWWWW..",
+        ".WWWWWWWWW..",
+        "...WW.WW....",
+    },
+    ReindeerA = {
+        "..........B..B",
+        "...........BB.",
+        "..........BBBR",
+        "..........BKB.",
+        ".BBBBBBBBBBB..",
+        "BBBBBBBBBBB...",
+        ".BBBBBBBBBB...",
+        ".BBBBBBBBBB...",
+        ".B.B....B.B...",
+        ".B.B....B.B...",
+    },
+    ReindeerB = {
+        "..........B..B",
+        "...........BB.",
+        "..........BBBR",
+        "..........BKB.",
+        ".BBBBBBBBBBB..",
+        "BBBBBBBBBBB...",
+        ".BBBBBBBBBB...",
+        ".BBBBBBBBBB...",
+        "..B.B..B.B....",
+        ".B...B.B...B..",
+    },
+    SquirrelA = {
+        ".OOO........",
+        "OOOOO...O.O.",
+        "OO.OO...OOOO",
+        "O...O..OOKOO",
+        "O...OO.OOOO.",
+        ".O...OOOOLL.",
+        "..O..OOOOLL.",
+        "...OOOOOOO..",
+        "....O...O...",
+    },
+    SquirrelB = {
+        ".OOO........",
+        "OOOOO...O.O.",
+        "OO.OO...OOOO",
+        "O...O..OOKOO",
+        "O...OO.OOOO.",
+        ".O...OOOOLL.",
+        "..O..OOOOLL.",
+        "...OOOOOOO..",
+        ".....O.O....",
+    },
+    Web = {
+        "WWWWWWWWWW",
+        "WW...W...W",
+        "W.W..W..W.",
+        "W..WWWWW..",
+        "W..W.W.W..",
+        "WWWW..W...",
+        "W.W.W.....",
+        "W..W......",
+        "W.W.......",
+        "WW........",
+    },
+    Flag = {
+        "AAAAA",
+        "AAAAA",
+        ".AAA.",
+        ".AAA.",
+        "..A..",
+    },
 }
+
+--// Turns a whole sprite see-through (used for fading sprites in and out)
+local function SetSpriteTransparency(Sprite, Value)
+    for _, Pixel in Sprite:GetChildren() do
+        if Pixel:IsA("Frame") then
+            Pixel.BackgroundTransparency = Value
+        end
+    end
+end
 
 --// Palettes used in more than one place
 local P_Heart = { R={255,120,190}, W={255,230,245} }
@@ -12825,9 +12923,12 @@ local KittyThemes = {
             { Sprite = "Bow", Palette = { P={200,160,255}, W={240,230,255}, D={140,100,210} } },
         },
         Walker = { Frames = {"KittyA","KittyB"}, Palette = { K={28,24,34}, W={255,255,255}, P={255,140,200} }, Mode = "walk", Mirror = true },
+        GroundWalker = { Frames = {"BunnyA","BunnyB"}, Palette = { W={250,245,255}, P={255,150,200}, K={40,30,50} }, Hop = true },
+        Bunting = { {255,140,200}, {200,160,255}, {255,240,250} },
         Particles = {
-            { Kind = "sparkle", Count = 12, Color = {255,205,235} },
-            { Kind = "heart", Count = 5, Palette = P_Heart, Px = 1 },
+            { Kind = "sparkle", Count = 18, Color = {255,205,235} },
+            { Kind = "heart", Count = 10, Palette = P_Heart, Px = 1 },
+            { Kind = "petal", Count = 12, Color = {255,170,215} },
         },
         Star = {255,210,240},
     },
@@ -12854,9 +12955,11 @@ local KittyThemes = {
         },
         Walker = { Frames = {"PenguinA","PenguinB"}, Palette = { K={30,34,48}, W={245,248,255}, O={255,150,40}, R={220,40,50} }, Mode = "walk", Mirror = true },
         Lights = true,
+        GroundWalker = { Frames = {"ReindeerA","ReindeerB"}, Palette = { B={150,95,55}, K={20,15,10}, R={255,40,40} } },
         Particles = {
-            { Kind = "snow", Count = 24, Color = {245,248,255} },
-            { Kind = "sparkle", Count = 4, Color = {255,215,90} },
+            { Kind = "snow", Count = 36, Color = {245,248,255} },
+            { Kind = "flake", Count = 8, Color = {225,240,255} },
+            { Kind = "sparkle", Count = 8, Color = {255,215,90} },
         },
         Star = {255,240,200},
     },
@@ -12882,9 +12985,13 @@ local KittyThemes = {
             { Frames = {"GhostA","GhostB"}, Palette = { W={240,240,255}, K={30,20,40}, P={255,160,200} }, Px = 1 },
         },
         Walker = { Frames = {"BatA","BatB"}, Palette = { K={50,25,65}, R={255,60,60} }, Mode = "fly" },
+        GroundWalker = { Frames = {"GhostA","GhostB"}, Palette = { W={240,240,255}, K={30,20,40}, P={255,160,200} }, Float = true },
+        Bunting = { {255,130,20}, {140,60,200}, {35,25,45} },
+        Webs = true,
         Particles = {
-            { Kind = "sparkle", Count = 8, Color = {190,120,255} },
-            { Kind = "ember", Count = 10, Color = {255,140,40} },
+            { Kind = "sparkle", Count = 12, Color = {190,120,255} },
+            { Kind = "ember", Count = 22, Color = {255,140,40} },
+            { Kind = "petal", Count = 8, Color = {150,90,200} },
         },
         Star = {200,150,255},
     },
@@ -12910,10 +13017,13 @@ local KittyThemes = {
             { Sprite = "Leaf", Palette = P_Leaf },
         },
         Walker = { Frames = {"TurkeyA","TurkeyB"}, Palette = { R={200,50,40}, O={240,140,40}, Y={250,200,80}, B={120,70,35}, K={20,15,10} }, Mode = "walk", Mirror = true },
+        GroundWalker = { Frames = {"SquirrelA","SquirrelB"}, Palette = { O={170,95,45}, L={240,200,150}, K={20,15,10} }, Hop = true },
+        Bunting = { {230,140,50}, {190,60,30}, {250,200,80} },
         Particles = {
-            { Kind = "leaf", Count = 10, Palette = P_Leaf },
-            { Kind = "leaf", Count = 4, Palette = P_RedLeaf },
-            { Kind = "sparkle", Count = 3, Color = {255,210,120} },
+            { Kind = "leaf", Count = 16, Palette = P_Leaf },
+            { Kind = "leaf", Count = 8, Palette = P_RedLeaf },
+            { Kind = "petal", Count = 10, Color = {230,150,60} },
+            { Kind = "sparkle", Count = 6, Color = {255,210,120} },
         },
         Star = {255,220,150},
     },
@@ -12939,9 +13049,13 @@ local KittyThemes = {
             { Sprite = "Letter", Palette = { P={255,120,170}, W={255,245,248}, R={220,30,70} } },
         },
         Walker = { Frames = {"KittyA","KittyB"}, Palette = { K={250,236,242}, W={60,20,40}, P={230,40,90} }, Mode = "walk", Mirror = true },
+        GroundWalker = { Frames = {"BunnyA","BunnyB"}, Palette = { W={255,190,215}, P={230,40,90}, K={60,20,40} }, Hop = true },
+        Bunting = { {230,40,90}, {255,150,190}, {255,240,245} },
         Particles = {
-            { Kind = "heart", Count = 10, Palette = { R={255,90,140}, W={255,210,225} } },
-            { Kind = "sparkle", Count = 6, Color = {255,190,215} },
+            { Kind = "heart", Count = 16, Palette = { R={255,90,140}, W={255,210,225} } },
+            { Kind = "heart", Count = 8, Palette = { R={255,160,200}, W={255,235,245} }, Px = 1 },
+            { Kind = "petal", Count = 14, Color = {220,30,70} },
+            { Kind = "sparkle", Count = 12, Color = {255,190,215} },
         },
         Star = {255,200,225},
     },
@@ -13205,16 +13319,29 @@ local function BuildKittyDecor(Def)
                 Obj = BuildSprite(Root, SpriteRows.Leaf, Spec.Palette, Px, false, 3)
             elseif Spec.Kind == "heart" then
                 Obj = BuildSprite(Root, SpriteRows.Heart, Spec.Palette, Px, false, 3)
+            elseif Spec.Kind == "petal" then
+                --// little tumbling petals / dust
+                Obj = Instance.new("Frame")
+                Obj.Size = UDim2.fromOffset(math.random(3, 4), 2)
+                Obj.BackgroundColor3 = KittyRGB(Spec.Color)
+                Obj.BackgroundTransparency = 0.1
+                Obj.BorderSizePixel = 0
+                Obj.ZIndex = 3
+                Obj.Parent = Root
+            elseif Spec.Kind == "flake" then
+                Obj = BuildSprite(Root, SpriteRows.Sparkle, { W = Spec.Color }, Px, false, 3)
             end
             Obj.AnchorPoint = Vector2.new(0.5, 0.5)
+            local Kind = Spec.Kind
             table.insert(Particles, {
                 Obj = Obj,
                 X = 0.03 + math.random() * 0.94,
-                Speed = ((Spec.Kind == "snow" or Spec.Kind == "ember") and 0.07 or 0.04) + math.random() * 0.05,
+                Speed = ((Kind == "snow" or Kind == "ember") and 0.07 or 0.04) + math.random() * 0.05,
                 Phase = math.random(),
-                Sway = 0.01 + math.random() * 0.02,
-                Falls = Spec.Kind == "snow" or Spec.Kind == "leaf",
-                Twinkle = Spec.Kind == "sparkle" or Spec.Kind == "ember",
+                Sway = 0.01 + math.random() * 0.025,
+                Falls = Kind == "snow" or Kind == "leaf" or Kind == "petal" or Kind == "flake",
+                Twinkle = Kind == "sparkle" or Kind == "ember",
+                Spin = Kind == "petal" and (math.random() < 0.5 and -1 or 1) * (120 + math.random() * 200) or nil,
             })
         end
     end
@@ -13236,6 +13363,125 @@ local function BuildKittyDecor(Def)
     StarHead.AnchorPoint = Vector2.new(0.5, 0.5)
     StarHead.Position = UDim2.fromScale(1, 0.5)
     local StarFrom = Vector2.new(0.1, 0.1)
+
+    --// Outer aura: two soft glowing rings around the window that turn the other way
+    local AuraGradients = {}
+    for Index, Spec in ipairs({ { 12, 3, 0.55 }, { 24, 2, 0.8 } }) do
+        local Aura = Instance.new("Frame")
+        Aura.AnchorPoint = Vector2.new(0.5, 0.5)
+        Aura.BackgroundTransparency = 1
+        Aura.BorderSizePixel = 0
+        Aura.Position = UDim2.fromScale(0.5, 0.5)
+        Aura.Size = UDim2.new(1, Spec[1], 1, Spec[1])
+        Aura.ZIndex = 1
+        Aura.Parent = Root
+        local AuraCorner = Instance.new("UICorner")
+        AuraCorner.CornerRadius = UDim.new(0, Library.CornerRadius + Spec[1] / 2)
+        AuraCorner.Parent = Aura
+        local AuraStroke = Instance.new("UIStroke")
+        AuraStroke.Thickness = Spec[2]
+        AuraStroke.Transparency = Spec[3]
+        AuraStroke.Color = Color3.new(1, 1, 1)
+        AuraStroke.Parent = Aura
+        local AuraGradient = Instance.new("UIGradient")
+        AuraGradient.Color = ThemeSequence(Def.Border)
+        AuraGradient.Parent = AuraStroke
+        AuraGradients[Index] = AuraGradient
+    end
+
+    --// Bunting: a string of little flags hanging along the top edge
+    if Def.Bunting then
+        local String = Instance.new("Frame")
+        String.AnchorPoint = Vector2.new(0.5, 0)
+        String.BackgroundColor3 = Color3.new(1, 1, 1)
+        String.BackgroundTransparency = 0.6
+        String.BorderSizePixel = 0
+        String.Position = UDim2.new(0.5, 0, 0, 2)
+        String.Size = UDim2.new(0.62, 0, 0, 1)
+        String.ZIndex = 3
+        String.Parent = Root
+        local Count = 13
+        for Index = 1, Count do
+            local Color = Def.Bunting[(Index - 1) % #Def.Bunting + 1]
+            local Flag = BuildSprite(Root, SpriteRows.Flag, { A = Color }, PIXEL, false, 3)
+            Flag.AnchorPoint = Vector2.new(0.5, 0)
+            local Base = UDim2.new(0.19 + 0.62 * (Index - 1) / (Count - 1), 0, 0, 3)
+            Flag.Position = Base
+            table.insert(Bobbers, { Flag, Base, 2.2, Index * 0.6, 2 })
+        end
+    end
+
+    --// Cobwebs in the top corners
+    if Def.Webs then
+        for _, Left in { true, false } do
+            local Web = BuildSprite(Root, SpriteRows.Web, { W = {205, 205, 220} }, PIXEL, not Left, 3)
+            Web.AnchorPoint = Vector2.new(Left and 0 or 1, 0)
+            Web.Position = Left and UDim2.fromOffset(1, 1) or UDim2.new(1, -1, 0, 1)
+            SetSpriteTransparency(Web, 0.45)
+        end
+    end
+
+    --// Twinkling starfield scattered over the window
+    local Stars = {}
+    for _ = 1, 24 do
+        local Dot = Instance.new("Frame")
+        Dot.AnchorPoint = Vector2.new(0.5, 0.5)
+        Dot.BackgroundColor3 = KittyRGB(Def.Star or {255, 255, 255})
+        Dot.BorderSizePixel = 0
+        Dot.Position = UDim2.fromScale(0.03 + math.random() * 0.94, 0.06 + math.random() * 0.88)
+        Dot.Size = UDim2.fromOffset(2, 2)
+        Dot.ZIndex = 2
+        Dot.Parent = Root
+        table.insert(Stars, { Dot, math.random() * 6.28, 1.5 + math.random() * 2.5 })
+    end
+
+    --// Sparkle bursts that pop at random spots
+    local BurstColors = {}
+    for _, Point in Def.Border do
+        table.insert(BurstColors, Color3.fromRGB(Point[2], Point[3], Point[4]))
+    end
+    local Bursts = {}
+    for BurstIndex = 1, 3 do
+        local Pixels = {}
+        for Index = 1, 8 do
+            local Pixel = Instance.new("Frame")
+            Pixel.AnchorPoint = Vector2.new(0.5, 0.5)
+            Pixel.BorderSizePixel = 0
+            Pixel.Size = UDim2.fromOffset(3, 3)
+            Pixel.BackgroundColor3 = BurstColors[(Index + BurstIndex) % #BurstColors + 1]
+            Pixel.Visible = false
+            Pixel.ZIndex = 5
+            Pixel.Parent = Root
+            Pixels[Index] = Pixel
+        end
+        Bursts[BurstIndex] = { Pixels = Pixels, Origin = Vector2.new(0.5, 0.5), Born = -10 }
+    end
+    local LastBurst = 0
+    local NextBurst = 1
+
+    --// Sparkle trail left behind by the main creature
+    local Trail = {}
+    for Index = 1, 14 do
+        local Bit = Instance.new("Frame")
+        Bit.AnchorPoint = Vector2.new(0.5, 0.5)
+        Bit.BorderSizePixel = 0
+        Bit.Size = UDim2.fromOffset(2, 2)
+        Bit.BackgroundColor3 = BurstColors[Index % #BurstColors + 1]
+        Bit.Visible = false
+        Bit.ZIndex = 5
+        Bit.Parent = Root
+        Trail[Index] = { Bit = Bit, Born = -10, Base = UDim2.new() }
+    end
+    local LastTrail = 0
+    local NextTrail = 1
+
+    --// A second creature that wanders along the bottom edge
+    local GW = Def.GroundWalker
+    local Ground, ShowGround, GroundFrames
+    if GW then
+        Ground, ShowGround, GroundFrames = BuildAnimated(Root, GW.Frames, GW.Palette, PIXEL, true, 6)
+        Ground.AnchorPoint = Vector2.new(0.5, 1)
+    end
 
     --// The moving 8-bit creature and its baby
     local W = Def.Walker
@@ -13314,6 +13560,9 @@ local function BuildKittyDecor(Def)
             if P.Twinkle then
                 P.Obj.Visible = math.sin(T * 4 + P.Phase * 10) > -0.4
             end
+            if P.Spin then
+                P.Obj.Rotation = (T * P.Spin) % 360
+            end
         end
 
         --// shooting star: a 0.8 s dash every 6 s from a random spot
@@ -13330,6 +13579,73 @@ local function BuildKittyDecor(Def)
             Star.BackgroundTransparency = K > 0.7 and (K - 0.7) / 0.3 or 0
         else
             Star.Visible = false
+        end
+
+        --// aura rings turn the opposite way to the border
+        for Index, AuraGradient in AuraGradients do
+            AuraGradient.Rotation = (-T * (25 + Index * 15)) % 360
+        end
+
+        for _, Star in Stars do
+            Star[1].BackgroundTransparency = 0.15 + 0.85 * (0.5 + 0.5 * math.sin(T * Star[3] + Star[2]))
+        end
+
+        --// pop a new burst every ~0.9 s, recycling three
+        if T - LastBurst > 0.9 then
+            LastBurst = T
+            local Burst = Bursts[NextBurst]
+            NextBurst = NextBurst % #Bursts + 1
+            Burst.Origin = Vector2.new(0.08 + math.random() * 0.84, 0.1 + math.random() * 0.8)
+            Burst.Born = T
+        end
+        for _, Burst in Bursts do
+            local Age = (T - Burst.Born) / 0.7
+            local Alive = Age >= 0 and Age < 1
+            for Index, Pixel in Burst.Pixels do
+                Pixel.Visible = Alive
+                if Alive then
+                    local Angle = (Index / #Burst.Pixels) * math.pi * 2
+                    local Distance = (1 - (1 - Age) ^ 2) * 26
+                    Pixel.Position = UDim2.new(Burst.Origin.X, math.cos(Angle) * Distance, Burst.Origin.Y, math.sin(Angle) * Distance)
+                    Pixel.BackgroundTransparency = Age
+                end
+            end
+        end
+
+        --// trail: drop a sparkle behind the main creature, then let it float up and fade
+        if T - LastTrail > 0.07 then
+            LastTrail = T
+            local Piece = Trail[NextTrail]
+            NextTrail = NextTrail % #Trail + 1
+            Piece.Born = T
+            Piece.Base = Walker.Position + UDim2.fromOffset(math.random(-7, 7), -math.random(2, 10))
+        end
+        for _, Piece in Trail do
+            local Age = (T - Piece.Born) / 0.6
+            local Alive = Age >= 0 and Age < 1
+            Piece.Bit.Visible = Alive
+            if Alive then
+                Piece.Bit.Position = Piece.Base + UDim2.fromOffset(0, -math.floor(Age * 10))
+                Piece.Bit.BackgroundTransparency = Age
+            end
+        end
+
+        --// the bottom-edge creature
+        if Ground then
+            local GX = 0.5 + 0.36 * math.sin(T * 0.22 + 2)
+            local FacingLeft = math.cos(T * 0.22 + 2) < 0
+            local YOffset = -2
+            if GW.Hop then
+                YOffset -= math.floor(math.abs(math.sin(T * 6)) * 8)
+                ShowGround(math.abs(math.sin(T * 6)) > 0.5 and 2 or 1, FacingLeft)
+            elseif GW.Float then
+                YOffset -= 6 + math.floor(math.sin(T * 2) * 3)
+                ShowGround(math.floor(T / 0.3) % GroundFrames + 1, FacingLeft)
+            else
+                YOffset -= (math.floor(T / 0.14) % 2 == 0) and 0 or 1
+                ShowGround(math.floor(T / 0.14) % GroundFrames + 1, FacingLeft)
+            end
+            Ground.Position = UDim2.new(GX, 0, 1, YOffset)
         end
 
         if #Lights > 0 then
@@ -14254,7 +14570,7 @@ function GroupboxFuncs:AddThemeDropdown(Info)
     Info = Info or {}
     HookUnload()
     return self:AddDropdown("ThemeDropdown", {
-        Text = Info.Text or "Kitty Theme",
+        Text = Info.Text or "Themes",
         Values = table.clone(KittyThemeOrder),
         Default = Info.Default or "Cute",
         Callback = function(Value)
@@ -14272,7 +14588,7 @@ function GroupboxFuncs:AddThemeToggle(Info)
     Info = Info or {}
     HookUnload()
     return self:AddToggle("ThemeToggle", {
-        Text = Info.Text or "Enable Kitty Theme",
+        Text = Info.Text or "Enable Themes",
         Default = Info.Default or false,
         Callback = function(Value)
             if Value and not KittyEnabled then
