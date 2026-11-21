@@ -13659,6 +13659,201 @@ local function BuildKittyDecor(Def)
     return { Root = Root, Connection = Connection }
 end
 
+--// Mini decorations for draggable labels / buttons (the watermark etc.).
+--// Drawn as an overlay that follows the element, so auto-sized labels don't get stretched.
+local function BuildMiniDecor(Def, Target)
+    local Root = Instance.new("Frame")
+    Root.Name = "ThemeMiniDecor"
+    Root.BackgroundTransparency = 1
+    Root.BorderSizePixel = 0
+    Root.ZIndex = (Target.ZIndex or 10) + 1
+    Root.Parent = ScreenGui
+
+    --// gradient border + faint aura
+    local Gradients = {}
+    for Index, Spec in ipairs({ { 0, 2, 0 }, { 8, 2, 0.6 } }) do
+        local Ring = Instance.new("Frame")
+        Ring.AnchorPoint = Vector2.new(0.5, 0.5)
+        Ring.BackgroundTransparency = 1
+        Ring.BorderSizePixel = 0
+        Ring.Position = UDim2.fromScale(0.5, 0.5)
+        Ring.Size = UDim2.new(1, Spec[1], 1, Spec[1])
+        Ring.ZIndex = Root.ZIndex
+        Ring.Parent = Root
+        local Corner = Instance.new("UICorner")
+        Corner.CornerRadius = UDim.new(0, Library.CornerRadius + Spec[1] / 2)
+        Corner.Parent = Ring
+        local Stroke = Instance.new("UIStroke")
+        Stroke.Thickness = Spec[2]
+        Stroke.Transparency = Spec[3]
+        Stroke.Color = Color3.new(1, 1, 1)
+        Stroke.Parent = Ring
+        local Gradient = Instance.new("UIGradient")
+        Gradient.Color = ThemeSequence(Def.Border)
+        Gradient.Parent = Stroke
+        Gradients[Index] = Gradient
+    end
+
+    --// little ears (Cute) or little toppers (other themes)
+    local LeftEarShow, RightEarShow
+    if Def.Ears then
+        local LeftEar
+        LeftEar, LeftEarShow = BuildAnimated(Root, { "EarA", "EarB" }, Def.Ears, 1, false, Root.ZIndex)
+        LeftEar.AnchorPoint = Vector2.new(0.5, 1)
+        LeftEar.Position = UDim2.new(0, 14, 0, 2)
+        local RightEar
+        RightEar, RightEarShow = BuildAnimated(Root, { "EarA", "EarB" }, Def.Ears, 1, false, Root.ZIndex, true)
+        RightEar.AnchorPoint = Vector2.new(0.5, 1)
+        RightEar.Position = UDim2.new(1, -14, 0, 2)
+        if Def.EarItem then
+            local Item = BuildSprite(Root, SpriteRows[Def.EarItem.Sprite], Def.EarItem.Palette, 1, false, Root.ZIndex + 1)
+            Item.AnchorPoint = Vector2.new(0.5, 0.5)
+            Item.Position = UDim2.new(0, 24, 0, -2)
+        end
+    end
+    local Bobbers = {}
+    for _, Topper in ipairs(Def.Toppers or {}) do
+        local IsLeft = Topper.Side == "left"
+        local Sprite = BuildSprite(Root, SpriteRows[Topper.Sprite], Topper.Palette, IsLeft and 2 or 1, false, Root.ZIndex + 1)
+        Sprite.AnchorPoint = Vector2.new(0.5, 1)
+        local Base = IsLeft and UDim2.new(0, 6, 0, 6) or UDim2.new(1, -6, 0, 4)
+        Sprite.Position = Base
+        table.insert(Bobbers, { Sprite, Base, IsLeft and 1.6 or 2.1 })
+    end
+
+    --// a sticker on the bottom-right corner
+    local Corner = Def.Corners and Def.Corners[2]
+    if Corner then
+        local Sticker = Corner.Frames and BuildAnimated(Root, Corner.Frames, Corner.Palette, 1, false, Root.ZIndex + 1)
+            or BuildSprite(Root, SpriteRows[Corner.Sprite], Corner.Palette, 1, false, Root.ZIndex + 1)
+        Sticker.AnchorPoint = Vector2.new(1, 1)
+        Sticker.Position = UDim2.new(1, 4, 1, 4)
+    end
+
+    --// tiny version of the theme's creature walking along the top
+    local W = Def.Walker
+    local Walker, ShowWalker, WalkerFrames = BuildAnimated(Root, W.Frames, W.Palette, 1, W.Mirror, Root.ZIndex + 2)
+    Walker.AnchorPoint = Vector2.new(0.5, 1)
+
+    --// a handful of the theme's first particle kind, drifting around the element
+    local Particles = {}
+    local Spec = Def.Particles and Def.Particles[1]
+    if Spec then
+        for _ = 1, 7 do
+            local Obj
+            if Spec.Kind == "snow" or Spec.Kind == "ember" or Spec.Kind == "petal" then
+                Obj = Instance.new("Frame")
+                Obj.Size = UDim2.fromOffset(2, 2)
+                Obj.BackgroundColor3 = KittyRGB(Spec.Color)
+                Obj.BorderSizePixel = 0
+                Obj.ZIndex = Root.ZIndex
+                Obj.Parent = Root
+            elseif Spec.Kind == "leaf" then
+                Obj = BuildSprite(Root, SpriteRows.Leaf, Spec.Palette, 1, false, Root.ZIndex)
+            elseif Spec.Kind == "heart" then
+                Obj = BuildSprite(Root, SpriteRows.Heart, Spec.Palette, 1, false, Root.ZIndex)
+            else
+                Obj = BuildSprite(Root, SpriteRows.Sparkle, { W = Spec.Color or {255, 255, 255} }, 1, false, Root.ZIndex)
+            end
+            Obj.AnchorPoint = Vector2.new(0.5, 0.5)
+            table.insert(Particles, {
+                Obj = Obj,
+                X = math.random() * 1.1 - 0.05,
+                Speed = 0.12 + math.random() * 0.12,
+                Phase = math.random(),
+                Falls = Spec.Kind == "snow" or Spec.Kind == "leaf" or Spec.Kind == "petal" or Spec.Kind == "flake",
+            })
+        end
+    end
+
+    local Start = os.clock()
+    local Connection
+    Connection = RunService.Heartbeat:Connect(function()
+        if not Root.Parent then
+            Connection:Disconnect()
+            return
+        end
+        if not Target.Parent then
+            Connection:Disconnect()
+            Root:Destroy()
+            return
+        end
+
+        --// follow the element (it can be dragged around)
+        Root.Visible = Target.Visible
+        if not Root.Visible then
+            return
+        end
+        local Offset = ScreenGui.AbsolutePosition
+        Root.Position = UDim2.fromOffset(Target.AbsolutePosition.X - Offset.X, Target.AbsolutePosition.Y - Offset.Y)
+        Root.Size = UDim2.fromOffset(Target.AbsoluteSize.X, Target.AbsoluteSize.Y)
+
+        local T = os.clock() - Start
+        for Index, Gradient in Gradients do
+            Gradient.Rotation = ((Index == 1 and 1 or -1) * T * 50) % 360
+        end
+
+        local Step = math.floor(T / 0.15) % WalkerFrames + 1
+        if W.Mode == "fly" then
+            ShowWalker(Step, false)
+            Walker.Position = UDim2.new(0.5 + 0.3 * math.sin(T * 0.7), 0, 0, -8 + math.floor(math.sin(T * 3) * 3))
+        else
+            ShowWalker(Step, math.cos(T * 0.5) < 0)
+            Walker.Position = UDim2.new(0.5 + 0.28 * math.sin(T * 0.5), 0, 0, (Step == 1) and 0 or -1)
+        end
+
+        if LeftEarShow then
+            local Cycle = T % 3.4
+            local LeftTurn = math.floor(T / 3.4) % 2 == 0
+            LeftEarShow((Cycle < 0.14 and LeftTurn) and 2 or 1, false)
+            RightEarShow((Cycle < 0.14 and not LeftTurn) and 2 or 1, false)
+        end
+        for Index, Bobber in Bobbers do
+            Bobber[1].Position = Bobber[2] + UDim2.fromOffset(0, -math.floor(math.abs(math.sin(T * Bobber[3] + Index)) * 2))
+        end
+
+        for _, P in Particles do
+            local Progress = (T * P.Speed + P.Phase) % 1
+            local Y = P.Falls and (-0.3 + Progress * 1.6) or (1.3 - Progress * 1.6)
+            P.Obj.Position = UDim2.fromScale(P.X + math.sin(T + P.Phase * 6) * 0.03, Y)
+        end
+    end)
+
+    return { Root = Root, Connection = Connection }
+end
+
+--// Keeps a mini decor on every draggable label / button while a theme is on (new ones get it too)
+local function StartMiniDecors(Def)
+    local Minis = {}
+    local function Sync()
+        for _, Element in Library.DraggableElements do
+            if typeof(Element) == "Instance" and Element.Parent
+                and (Element:IsA("TextLabel") or Element:IsA("TextButton") or Element:IsA("ImageButton"))
+                and Element ~= Library.MainFrame and not Minis[Element] then
+                Minis[Element] = BuildMiniDecor(Def, Element)
+            end
+        end
+    end
+    Sync()
+
+    local LastSync = os.clock()
+    local Watcher = RunService.Heartbeat:Connect(function()
+        if os.clock() - LastSync > 1 then
+            LastSync = os.clock()
+            Sync()
+        end
+    end)
+
+    return function()
+        Watcher:Disconnect()
+        for _, Mini in Minis do
+            Mini.Connection:Disconnect()
+            Mini.Root:Destroy()
+        end
+        table.clear(Minis)
+    end
+end
+
 --// Spinning icon on the selected tab (set Library.TabIconSpin = false to turn it off)
 Library.TabIconSpin = true
 Library.TabIconSpinSpeed = 120 --// degrees per second after the first quick spin
@@ -14536,7 +14731,13 @@ local KittyEnabled = false
 local PreviousTheme = nil
 local UnloadHooked = false
 
+local StopMinis = nil
+
 local function ClearDecor()
+    if StopMinis then
+        StopMinis()
+        StopMinis = nil
+    end
     if ActiveDecor then
         if ActiveDecor.Connection then
             ActiveDecor.Connection:Disconnect()
@@ -14554,6 +14755,7 @@ local function ApplyChosen()
     ClearDecor()
     Library:SetTheme("Kitty " .. Name)
     ActiveDecor = BuildKittyDecor(KittyThemes[Name])
+    StopMinis = StartMiniDecors(KittyThemes[Name])
 end
 
 local function HookUnload()
